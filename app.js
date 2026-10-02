@@ -37,5 +37,6 @@ app.get('/dashboard', requireLogin, (req, res) => res.render('dashboard'));
 app.use('/customers', requireLogin, require('./routes/customers'));
 // Admin lang ang may access sa barbers
 app.use('/barbers', requireRole('admin'), require('./routes/barbers'));
+app.use('/services', requireRole('admin'), require('./routes/services'));
 
 app.listen(3000, () => console.log('Server running at http://localhost:3000'));

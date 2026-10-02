@@ -1,0 +1,23 @@
+<p>
+  <a href="/dashboard">Dashboard</a> |
+  <a href="/customers">Customers</a> |
+  <a href="/barbers">Barbers</a> |
+  <a href="/services">Services</a> |
+  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+</p>
+
+<h1><%= service.service_id ? 'Edit' : 'Add' %> Service</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="POST" action="<%= action %>">
+  <input type="text" name="service_name" value="<%= service.service_name || '' %>" placeholder="Service name" required>
+  <input type="text" name="description" value="<%= service.description || '' %>" placeholder="Description (optional)">
+  <input type="number" name="price" step="0.01" min="0" value="<%= service.price || '' %>" placeholder="Price" required>
+  <input type="number" name="duration_minutes" min="1" value="<%= service.duration_minutes || '' %>" placeholder="Minutes" required>
+  <select name="is_active">
+    <option value="1" <%= (service.is_active == 1 || service.is_active === '1') ? 'selected' : '' %>>Active</option>
+    <option value="0" <%= (service.is_active == 0 || service.is_active === '0') ? 'selected' : '' %>>Inactive</option>
+  </select>
+  <button type="submit">Save</button>
+  <a href="/services">Cancel</a>
+</form>
