@@ -1,0 +1,27 @@
+<p>
+  <a href="/dashboard">Dashboard</a> |
+  <a href="/customers">Customers</a> |
+  <a href="/barbers">Barbers</a> |
+  <a href="/services">Services</a> |
+  <a href="/users">Users</a> |
+  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+</p>
+
+<h1><%= user.user_id ? 'Edit' : 'Add' %> User</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="POST" action="<%= action %>">
+  <input type="text" name="username" value="<%= user.username || '' %>" placeholder="Username" required>
+  <input type="text" name="full_name" value="<%= user.full_name || '' %>" placeholder="Full name" required>
+  <% if (user.user_id) { %>
+    <input type="password" name="password" placeholder="New password (leave blank to keep current)">
+  <% } else { %>
+    <input type="password" name="password" placeholder="Password" required>
+  <% } %>
+  <select name="role">
+    <option value="staff" <%= user.role === 'staff' ? 'selected' : '' %>>Staff</option>
+    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+  </select>
+  <button type="submit">Save</button>
+  <a href="/users">Cancel</a>
+</form>

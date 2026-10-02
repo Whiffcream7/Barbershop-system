@@ -38,5 +38,7 @@ app.use('/customers', requireLogin, require('./routes/customers'));
 // Admin lang ang may access sa barbers
 app.use('/barbers', requireRole('admin'), require('./routes/barbers'));
 app.use('/services', requireRole('admin'), require('./routes/services'));
+// Admin lang ang may access sa user accounts
+app.use('/users', requireRole('admin'), require('./routes/users'));
 
 app.listen(3000, () => console.log('Server running at http://localhost:3000'));
