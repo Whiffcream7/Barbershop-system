@@ -1,0 +1,27 @@
+<h1>Customers</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="GET" action="/customers">
+  <input type="text" name="search" value="<%= search %>" placeholder="Search name or phone">
+  <button type="submit">Search</button>
+</form>
+<a href="/customers/add">Add Customer</a>
+
+<table border="1">
+  <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
+  <% customers.forEach(c => { %>
+    <tr>
+      <td><%= c.customer_id %></td>
+      <td><%= c.first_name %> <%= c.last_name %></td>
+      <td><%= c.phone %></td>
+      <td><%= c.email %></td>
+      <td>
+        <a href="/customers/edit/<%= c.customer_id %>">Edit</a>
+        <form method="POST" action="/customers/delete/<%= c.customer_id %>" style="display:inline"
+              onsubmit="return confirm('Delete this customer?')">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>

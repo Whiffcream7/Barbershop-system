@@ -1,0 +1,11 @@
+<h1><%= customer.customer_id ? 'Edit' : 'Add' %> Customer</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="POST" action="<%= action %>">
+  <input type="text" name="first_name" value="<%= customer.first_name || '' %>" placeholder="First name" required>
+  <input type="text" name="last_name" value="<%= customer.last_name || '' %>" placeholder="Last name" required>
+  <input type="text" name="phone" value="<%= customer.phone || '' %>" placeholder="Phone" required>
+  <input type="email" name="email" value="<%= customer.email || '' %>" placeholder="Email (optional)">
+  <button type="submit">Save</button>
+  <a href="/customers">Cancel</a>
+</form>
