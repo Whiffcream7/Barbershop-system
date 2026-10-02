@@ -1,0 +1,35 @@
+<p>
+  <a href="/dashboard">Dashboard</a> |
+  <a href="/customers">Customers</a> |
+  <a href="/barbers">Barbers</a> |
+  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+</p>
+
+<h1>Barbers</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="GET" action="/barbers">
+  <input type="text" name="search" value="<%= search %>" placeholder="Search name or specialty">
+  <button type="submit">Search</button>
+</form>
+<a href="/barbers/add">Add Barber</a>
+
+<table border="1">
+  <tr><th>ID</th><th>Name</th><th>Specialty</th><th>Phone</th><th>Status</th><th>Actions</th></tr>
+  <% barbers.forEach(b => { %>
+    <tr>
+      <td><%= b.barber_id %></td>
+      <td><%= b.first_name %> <%= b.last_name %></td>
+      <td><%= b.specialty %></td>
+      <td><%= b.phone %></td>
+      <td><%= b.status %></td>
+      <td>
+        <a href="/barbers/edit/<%= b.barber_id %>">Edit</a>
+        <form method="POST" action="/barbers/delete/<%= b.barber_id %>" style="display:inline"
+              onsubmit="return confirm('Delete this barber?')">
+          <button type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>

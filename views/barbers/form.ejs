@@ -1,0 +1,22 @@
+<p>
+  <a href="/dashboard">Dashboard</a> |
+  <a href="/customers">Customers</a> |
+  <a href="/barbers">Barbers</a> |
+  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
+</p>
+
+<h1><%= barber.barber_id ? 'Edit' : 'Add' %> Barber</h1>
+<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+
+<form method="POST" action="<%= action %>">
+  <input type="text" name="first_name" value="<%= barber.first_name || '' %>" placeholder="First name" required>
+  <input type="text" name="last_name" value="<%= barber.last_name || '' %>" placeholder="Last name" required>
+  <input type="text" name="specialty" value="<%= barber.specialty || '' %>" placeholder="Specialty (optional)">
+  <input type="text" name="phone" value="<%= barber.phone || '' %>" placeholder="Phone (optional)">
+  <select name="status">
+    <option value="active" <%= barber.status === 'active' ? 'selected' : '' %>>Active</option>
+    <option value="inactive" <%= barber.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+  </select>
+  <button type="submit">Save</button>
+  <a href="/barbers">Cancel</a>
+</form>

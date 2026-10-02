@@ -2,4 +2,7 @@
 <p>Welcome, <%= currentUser.full_name %> (<%= currentUser.role %>)</p>
 
 <a href="/customers">Customers</a>
+<% if (currentUser.role === 'admin') { %>
+  <a href="/barbers">Barbers</a>
+<% } %>
 <a href="/logout">Logout</a>

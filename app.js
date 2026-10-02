@@ -2,7 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const pool = require('./config/db');
-const { requireLogin } = require('./middleware/auth');
+const { requireLogin, requireRole } = require('./middleware/auth');
 
 const app = express();
 
@@ -35,5 +35,7 @@ app.get('/dashboard', requireLogin, (req, res) => res.render('dashboard'));
 
 // Protected na ang customers: kailangan naka-login
 app.use('/customers', requireLogin, require('./routes/customers'));
+// Admin lang ang may access sa barbers
+app.use('/barbers', requireRole('admin'), require('./routes/barbers'));
 
 app.listen(3000, () => console.log('Server running at http://localhost:3000'));
