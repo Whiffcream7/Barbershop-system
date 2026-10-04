@@ -23,8 +23,16 @@
         <a class="module-card" href="/barbers"><span class="module-icon">B</span><span><strong>Barbers</strong><small>Profiles & status</small></span><b>→</b></a>
         <a class="module-card" href="/services"><span class="module-icon">S</span><span><strong>Services</strong><small>Prices & durations</small></span><b>→</b></a>
         <a class="module-card" href="/users"><span class="module-icon">U</span><span><strong>User Accounts</strong><small>Admin-only access</small></span><b>→</b></a>
-      <% } %>
+        <a class="module-card" href="/appointments"><span class="module-icon">A</span><span><strong>Appointments</strong><small>Search & manage appointments</small></span><b>→</b></a>
+        <a class="module-card" href="/queue"><span class="module-icon">Q</span><span><strong>Queue</strong><small>Manage queue</small></span><b>→</b></a>
+        <a class="module-card" href="/payments"><span class="module-icon">P</span><span><strong>Payments</strong><small>Record Payments</small></span><b>→</b></a>
+        <a class="module-card" href="/reports"><span class="module-icon">R</span><span><strong>Reports</strong><small>Track sales, appointments, and service trends</small></span><b>→</b></a>
+      <% }  else if (currentUser.role === 'staff') { %>
       <!-- Add Appointments, Queue, Payments, Reports cards here when M4's routes exist -->
+        <a class="module-card" href="/appointments"><span class="module-icon">A</span><span><strong>Appointments</strong><small>Search & manage appointments</small></span><b>→</b></a>
+        <a class="module-card" href="/queue"><span class="module-icon">Q</span><span><strong>Queue</strong><small>Manage queue</small></span><b>→</b></a>
+        <a class="module-card" href="/payments"><span class="module-icon">P</span><span><strong>Payments</strong><small>Record Payments</small></span><b>→</b></a>
+      <% } %>
     </div>
   </article>
 </section>
