@@ -1,8 +1,40 @@
-<h1>Barbershop System Login</h1>
-<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BarberSuite</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-decoration decoration-a"></div>
+    <div class="login-decoration decoration-b"></div>
 
-<form method="POST" action="/login">
-  <input type="text" name="username" placeholder="Username" required>
-  <input type="password" name="password" placeholder="Password" required>
-  <button type="submit">Login</button>
-</form>
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="brand large-brand">
+        <span class="brand-icon">BS</span>
+        <span><strong>BarberSuite</strong><small>Queue & Appointment System</small></span>
+      </div>
+
+      <div class="login-copy">
+        <p class="eyebrow">SECURE SIGN IN</p>
+        <h1 id="login-title">Welcome back.</h1>
+        <p>Sign in with a registered account to access the system according to your assigned role.</p>
+      </div>
+
+      <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+      <form class="login-form" method="POST" action="/login">
+        <label>Username *
+          <input type="text" name="username" autocomplete="username" placeholder="Enter username" required>
+        </label>
+        <label>Password *
+          <input type="password" name="password" autocomplete="current-password" placeholder="Enter password" required>
+        </label>
+        <button class="button primary full-width" type="submit">Sign in to system</button>
+      </form>
+    </section>
+  </div>
+</body>
+</html>

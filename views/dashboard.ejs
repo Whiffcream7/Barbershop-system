@@ -1,10 +1,32 @@
-<h1>Dashboard</h1>
-<p>Welcome, <%= currentUser.full_name %> (<%= currentUser.role %>)</p>
+<%- include('partials/header') %>
 
-<a href="/customers">Customers</a>
-<% if (currentUser.role === 'admin') { %>
-  <a href="/barbers">Barbers</a>
-  <a href="/services">Services</a>
-  <a href="/users">Users</a>
-<% } %>
-<a href="/logout">Logout</a>
+<section class="page-section active-section">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">CONTROL CENTER</p>
+      <h1>Good day, <%= currentUser.full_name %>.</h1>
+      <p class="muted">Signed in as <%= currentUser.role === 'admin' ? 'Administrator' : 'Staff / Receptionist' %>.</p>
+    </div>
+    <div class="heading-actions">
+      <a class="button ghost" href="/logout">Log out</a>
+    </div>
+  </div>
+
+  <article class="panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">QUICK ACCESS</p><h3>Modules</h3></div>
+      <span class="status-pill">READY</span>
+    </div>
+    <div class="module-grid">
+      <a class="module-card" href="/customers"><span class="module-icon">C</span><span><strong>Customers</strong><small>Search & manage records</small></span><b>→</b></a>
+      <% if (currentUser.role === 'admin') { %>
+        <a class="module-card" href="/barbers"><span class="module-icon">B</span><span><strong>Barbers</strong><small>Profiles & status</small></span><b>→</b></a>
+        <a class="module-card" href="/services"><span class="module-icon">S</span><span><strong>Services</strong><small>Prices & durations</small></span><b>→</b></a>
+        <a class="module-card" href="/users"><span class="module-icon">U</span><span><strong>User Accounts</strong><small>Admin-only access</small></span><b>→</b></a>
+      <% } %>
+      <!-- Add Appointments, Queue, Payments, Reports cards here when M4's routes exist -->
+    </div>
+  </article>
+</section>
+
+<%- include('partials/footer') %>

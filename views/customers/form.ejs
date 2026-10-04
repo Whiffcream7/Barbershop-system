@@ -1,17 +1,43 @@
-<p>
-  <a href="/dashboard">Dashboard</a> |
-  <a href="/customers">Customers</a> |
-  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
-</p>
+<%- include('../partials/header') %>
 
-<h1><%= customer.customer_id ? 'Edit' : 'Add' %> Customer</h1>
-<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">CUSTOMER MANAGEMENT</p>
+      <h2><%= customer.customer_id ? 'Edit' : 'Add' %> customer</h2>
+    </div>
+    <a class="button secondary" href="/customers">Back to list</a>
+  </div>
 
-<form method="POST" action="<%= action %>">
-  <input type="text" name="first_name" value="<%= customer.first_name || '' %>" placeholder="First name" required>
-  <input type="text" name="last_name" value="<%= customer.last_name || '' %>" placeholder="Last name" required>
-  <input type="text" name="phone" value="<%= customer.phone || '' %>" placeholder="Phone" required>
-  <input type="email" name="email" value="<%= customer.email || '' %>" placeholder="Email (optional)">
-  <button type="submit">Save</button>
-  <a href="/customers">Cancel</a>
-</form>
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">CUSTOMER RECORD</p><h3><%= customer.customer_id ? 'Edit' : 'Add' %> customer</h3></div>
+      <span class="required-note">* Required</span>
+    </div>
+
+    <form method="POST" action="<%= action %>">
+      <div class="form-grid">
+        <label>First name *
+          <input type="text" name="first_name" value="<%= customer.first_name || '' %>" placeholder="First name" required>
+        </label>
+        <label>Last name *
+          <input type="text" name="last_name" value="<%= customer.last_name || '' %>" placeholder="Last name" required>
+        </label>
+        <label>Phone *
+          <input type="text" name="phone" value="<%= customer.phone || '' %>" placeholder="Phone" required>
+        </label>
+        <label>Email
+          <input type="email" name="email" value="<%= customer.email || '' %>" placeholder="Email (optional)">
+        </label>
+      </div>
+      <div class="form-actions">
+        <a class="button secondary" href="/customers">Cancel</a>
+        <button class="button primary" type="submit">Save customer</button>
+      </div>
+    </form>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>

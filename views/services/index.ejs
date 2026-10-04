@@ -1,37 +1,53 @@
-<p>
-  <a href="/dashboard">Dashboard</a> |
-  <a href="/customers">Customers</a> |
-  <a href="/barbers">Barbers</a> |
-  <a href="/services">Services</a> |
-  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
-</p>
+<%- include('../partials/header') %>
 
-<h1>Services</h1>
-<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">SERVICE MANAGEMENT</p>
+      <h2>Services</h2>
+      <p class="muted">Manage services, prices and durations. Inactive services cannot be booked.</p>
+    </div>
+    <a class="button primary" href="/services/add">+ Add service</a>
+  </div>
 
-<form method="GET" action="/services">
-  <input type="text" name="search" value="<%= search %>" placeholder="Search service">
-  <button type="submit">Search</button>
-</form>
-<a href="/services/add">Add Service</a>
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
 
-<table border="1">
-  <tr><th>ID</th><th>Service</th><th>Description</th><th>Price</th><th>Minutes</th><th>Status</th><th>Actions</th></tr>
-  <% services.forEach(s => { %>
-    <tr>
-      <td><%= s.service_id %></td>
-      <td><%= s.service_name %></td>
-      <td><%= s.description %></td>
-      <td><%= s.price %></td>
-      <td><%= s.duration_minutes %></td>
-      <td><%= s.is_active ? 'Active' : 'Inactive' %></td>
-      <td>
-        <a href="/services/edit/<%= s.service_id %>">Edit</a>
-        <form method="POST" action="/services/delete/<%= s.service_id %>" style="display:inline"
-              onsubmit="return confirm('Delete this service?')">
-          <button type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-  <% }) %>
-</table>
+  <article class="panel table-panel">
+    <div class="toolbar">
+      <div><strong>Service records</strong><small><%= services.length %> shown</small></div>
+      <form class="search-box" method="GET" action="/services">
+        <input type="search" name="search" value="<%= search %>" placeholder="Search service">
+        <button class="button secondary" type="submit">Search</button>
+      </form>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Service</th><th>Description</th><th>Price</th><th>Minutes</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <% if (services.length === 0) { %><tr><td colspan="7">No services found.</td></tr><% } %>
+          <% services.forEach(s => { %>
+            <tr>
+              <td><%= s.service_id %></td>
+              <td><strong><%= s.service_name %></strong></td>
+              <td><%= s.description || '—' %></td>
+              <td>₱<%= s.price %></td>
+              <td><%= s.duration_minutes %></td>
+              <td><span class="status <%= s.is_active ? 'green' : 'gray' %>"><%= s.is_active ? 'Active' : 'Inactive' %></span></td>
+              <td>
+                <div class="action-links">
+                  <a href="/services/edit/<%= s.service_id %>">Edit</a>
+                  <form method="POST" action="/services/delete/<%= s.service_id %>" style="display:inline"
+                        onsubmit="return confirm('Delete this service?')">
+                    <button type="submit" class="danger-text" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>

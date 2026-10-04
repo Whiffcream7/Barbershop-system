@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberSuite - Barbershop Queue & Appointment System</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="app">
+<% if (typeof currentUser !== 'undefined' && currentUser) { %>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/dashboard">
+        <span class="brand-icon">BS</span>
+        <span><strong>BarberSuite</strong><small>Queue & Appointment System</small></span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/customers">Customers</a>
+        <!-- Add Appointments, Queue, Payments here once M4's routes exist -->
+        <% if (currentUser.role === 'admin') { %>
+          <a href="/barbers">Barbers</a>
+          <a href="/services">Services</a>
+          <a href="/users">Users</a>
+        <% } %>
+      </nav>
+
+      <div class="profile">
+        <span class="avatar"><%= currentUser.full_name.charAt(0) %></span>
+        <span class="profile-copy">
+          <strong><%= currentUser.full_name %></strong>
+          <small><%= currentUser.role === 'admin' ? 'Administrator' : 'Staff / Receptionist' %></small>
+        </span>
+      </div>
+      <a class="button ghost" href="/logout">Log out</a>
+    </div>
+  </header>
+<% } %>
+  <main class="container">

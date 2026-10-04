@@ -1,27 +1,49 @@
-<p>
-  <a href="/dashboard">Dashboard</a> |
-  <a href="/customers">Customers</a> |
-  <a href="/barbers">Barbers</a> |
-  <a href="/services">Services</a> |
-  <a href="/users">Users</a> |
-  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
-</p>
+<%- include('../partials/header') %>
 
-<h1><%= user.user_id ? 'Edit' : 'Add' %> User</h1>
-<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">USER ACCOUNTS</p>
+      <h2><%= user.user_id ? 'Edit' : 'Add' %> user</h2>
+    </div>
+    <a class="button secondary" href="/users">Back to list</a>
+  </div>
 
-<form method="POST" action="<%= action %>">
-  <input type="text" name="username" value="<%= user.username || '' %>" placeholder="Username" required>
-  <input type="text" name="full_name" value="<%= user.full_name || '' %>" placeholder="Full name" required>
-  <% if (user.user_id) { %>
-    <input type="password" name="password" placeholder="New password (leave blank to keep current)">
-  <% } else { %>
-    <input type="password" name="password" placeholder="Password" required>
-  <% } %>
-  <select name="role">
-    <option value="staff" <%= user.role === 'staff' ? 'selected' : '' %>>Staff</option>
-    <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
-  </select>
-  <button type="submit">Save</button>
-  <a href="/users">Cancel</a>
-</form>
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">ACCOUNT RECORD</p><h3><%= user.user_id ? 'Edit' : 'Add' %> user</h3></div>
+      <span class="required-note">* Required</span>
+    </div>
+    <form method="POST" action="<%= action %>">
+      <div class="form-grid">
+        <label>Username *
+          <input type="text" name="username" value="<%= user.username || '' %>" placeholder="Username" required>
+        </label>
+        <label>Full name *
+          <input type="text" name="full_name" value="<%= user.full_name || '' %>" placeholder="Full name" required>
+        </label>
+        <label>Password <%= user.user_id ? '' : '*' %>
+          <% if (user.user_id) { %>
+            <input type="password" name="password" placeholder="New password (leave blank to keep current)">
+          <% } else { %>
+            <input type="password" name="password" placeholder="Password" required>
+          <% } %>
+        </label>
+        <label>Role
+          <select name="role">
+            <option value="staff" <%= user.role === 'staff' ? 'selected' : '' %>>Staff</option>
+            <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-actions">
+        <a class="button secondary" href="/users">Cancel</a>
+        <button class="button primary" type="submit">Save user</button>
+      </div>
+    </form>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>

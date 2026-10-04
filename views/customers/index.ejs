@@ -1,32 +1,57 @@
-<p>
-  <a href="/dashboard">Dashboard</a> |
-  <a href="/customers">Customers</a> |
-  <a href="/logout">Logout (<%= currentUser.full_name %>)</a>
-</p>
-<h1>Customers</h1>
-<% if (error) { %><p style="color:red"><%= error %></p><% } %>
+<%- include('../partials/header') %>
 
-<form method="GET" action="/customers">
-  <input type="text" name="search" value="<%= search %>" placeholder="Search name or phone">
-  <button type="submit">Search</button>
-</form>
-<a href="/customers/add">Add Customer</a>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">CUSTOMER MANAGEMENT</p>
+      <h2>Customers</h2>
+      <p class="muted">Add, view, update, delete, and search customer records.</p>
+    </div>
+    <a class="button primary" href="/customers/add">+ Add customer</a>
+  </div>
 
-<table border="1">
-  <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
-  <% customers.forEach(c => { %>
-    <tr>
-      <td><%= c.customer_id %></td>
-      <td><%= c.first_name %> <%= c.last_name %></td>
-      <td><%= c.phone %></td>
-      <td><%= c.email %></td>
-      <td>
-        <a href="/customers/edit/<%= c.customer_id %>">Edit</a>
-        <form method="POST" action="/customers/delete/<%= c.customer_id %>" style="display:inline"
-              onsubmit="return confirm('Delete this customer?')">
-          <button type="submit">Delete</button>
-        </form>
-      </td>
-    </tr>
-  <% }) %>
-</table>
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel table-panel">
+    <div class="toolbar">
+      <div><strong>Customer records</strong><small><%= customers.length %> shown</small></div>
+      <form class="search-box" method="GET" action="/customers">
+        <input type="search" name="search" value="<%= search %>" placeholder="Search name or phone">
+        <button class="button secondary" type="submit">Search</button>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Customer</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% if (customers.length === 0) { %>
+            <tr><td colspan="5">No customers found.</td></tr>
+          <% } %>
+          <% customers.forEach(c => { %>
+            <tr>
+              <td><%= c.customer_id %></td>
+              <td><strong><%= c.first_name %> <%= c.last_name %></strong></td>
+              <td><%= c.phone %></td>
+              <td><%= c.email || '—' %></td>
+              <td>
+                <div class="action-links">
+                  <a href="/customers/edit/<%= c.customer_id %>">Edit</a>
+                  <form method="POST" action="/customers/delete/<%= c.customer_id %>" style="display:inline"
+                        onsubmit="return confirm('Delete this customer?')">
+                    <button type="submit" class="danger-text"
+                            style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>
