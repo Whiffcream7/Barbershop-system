@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments</title>
+</head>
+<body>
+    <h1>Payments</h1>
+
+    <% if (success) { %>
+        <p>Payment recorded successfully.</p>
+    <% } %>
+    
+    <a href="/payments/add">Record Payment</a>
+    <br><br>
+
+    <% if (payments.length === 0) { %>
+        <p>No payments recorded yet.</p>
+    <% } else { %>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Appointment ID</th>
+                    <th>Custoemr</th>
+                    <th>Barber</th>
+                    <th>Amount</th>
+                    <th>Payment Method</th>
+                    <th>Received By</th>
+                    <th>Payment Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% payments.forEach(payment => { %>
+                    <tr>
+                        <td><%= payment.payment_id %></td>
+                        <td><%= payment.appointment_id %></td>
+                        <td><%= payment.customer_name %></td>
+                        <td><%= payment.barber_name%></td>
+                        <td><%= Number(payment.amount).toFixed(2) %></td>
+                        <td><%= payment.payment_method %></td>
+                        <td><%= payment.received_by %></td>
+                        <td><%= new Date(payment.payment_date).toLocaleString('en-PH', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }) %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } %>
+</body>
+</html>

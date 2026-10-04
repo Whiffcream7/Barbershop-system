@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Appointment</title>
+</head>
+
+<body>
+    <h1>Add Appointment</h1>
+
+    <a href="/appointments">Back to Appointments</a>
+
+    <% if (error) { %>
+        <p>
+            <%= error %>
+        </p>
+        <% } %>
+
+            <form method="post" action="/appointments/add">
+
+                <label for="customer_id">Customer:</label>
+                <select name="customer_id" id="customer_id" required>
+                    <option value="">-- Select Customer --</option>
+
+                    <% customers.forEach(customer=> { %>
+                        <option value="<%= customer.customer_id %>">
+                            <%= customer.first_name %>
+                            <%= customer.last_name %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <br><br>
+
+                <label for="barber_id">Barber:</label>
+                <select name="barber_id" id="barber_id" required>
+                    <option value="">-- Select Barber --</option>
+
+                    <% barbers.forEach(barber=> { %>
+                        <option value="<%= barber.barber_id %>">
+                            <%= barber.first_name %>
+                            <%= barber.last_name %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <br><br>
+
+                <label for="booking_type">Booking Type:</label>
+                <select name="booking_type" id="booking_type" required>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="walk_in">Walk-in</option>
+                </select>
+
+                <br><br>
+
+                <label for="appointment_date">Date:</label>
+                <input type="date" name="appointment_date" id="appointment_date" required>
+
+                <br><br>
+
+                <label for="start_time">Start Time:</label>
+                <input type="time" name="start_time" id="start_time" required>
+
+                <br><br>
+
+                <label for="end_time">End Time:</label>
+                <input type="text" id="end_time" readonly>
+
+                <br><br>
+
+                <label>Services:</label>
+
+                <% services.forEach(service=> { %>
+                    <div>
+                        <input type="checkbox" name="service_ids" value="<%= service.service_id %>" id="service_<%= service.service_id %>" data-duration="<%= service.duration_minutes %>">
+
+                        <label for="service_<%= service.service_id %>">
+                            <%= service.service_name %> - ₱<%= service.price %> (<%= service.duration_minutes %> mins)
+                        </label>
+                    </div>
+                    <% }) %>
+
+                        <br>
+
+                        <button type="submit">Create Appointment</button>
+            </form>
+</body>
+
+<script>
+    // Get the start time and end time fields
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+
+    // Get the booking type field
+    const bookingTypeInput = document.getElementById('booking_type');
+    
+    // Get the appointment date field
+    const appointmentDateInput = document.getElementById('appointment_date');
+
+    // Get the labels for date and start time
+    const appointmentDateLabel = document.querySelector('label[for="appointment_date"]');
+    const startTimeLabel =document.querySelector('label[for="start_time"]');
+
+    // Update the date and time fields based on booking type
+    function updateBookingType() {
+        if (bookingTypeInput.value === 'walk_in') {
+            const now = new Date();
+
+            // Get today's date
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            // Get the current time
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            // Fill in the current date and time
+            appointmentDateInput.value = `${year}-${month}-${day}`;
+            startTimeInput.value = `${hours}:${minutes}`;
+
+            // Prevent the user from changing them
+            appointmentDateInput.disabled = true;
+            startTimeInput.disabled = true;
+
+            // Update the labels
+            appointmentDateLabel.textContent = 'Date (Today):';
+            startTimeLabel.textContent = 'Start Time (now:)';
+        } else {
+            //Allow the user to choose the date and time
+            appointmentDateInput.disabled = false;
+            startTimeInput.disabled = false;
+
+            appointmentDateLabel.textContent = 'Date:';
+            startTimeLabel.textContent = 'Start Time:';
+        }
+
+        //Recalculate the end time
+        calculateEndTime();
+    }
+
+    // Run when the booking type changes
+    bookingTypeInput.addEventListener('change', updateBookingType);
+
+    // Get all service checkboxes
+    const serviceCheckboxes = document.querySelectorAll('input[name="service_ids"]');
+
+    // Calculate the end time whenever the start time or selected services change
+    function calculateEndTime() {
+        if (!startTimeInput.value) {
+            endTimeInput.value = '';
+            return;
+        }
+
+        // Get the start time as hours and minutes
+        const [hours, minutes] = startTimeInput.value.split(':').map(Number);
+
+        //Convert the start time to total minutes
+        let totalMinutes = hours * 60 + minutes;
+
+        //Add the duration of every selected service
+        serviceCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                totalMinutes += Number(checkbox.dataset.duration);
+            }
+        });
+
+        // Make sure the appointment does not go into the next day
+        if (totalMinutes >= 24 * 60) {
+            endTimeInput.value = 'Invalid time';
+            return;
+        }
+
+        // Convert the total minutes back to hours and minutes
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMinutes = totalMinutes % 60;
+
+        // Display the calculated time
+        endTimeInput.value = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutes).padStart(2, '0')}`;
+    }    
+    
+    // Recalculate when the start time changes
+    startTimeInput.addEventListener('change', calculateEndTime);
+
+    //Recalculate when a service is selected/unselected
+    serviceCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', calculateEndTime);
+    });
+
+    // Set the correct fields when the form first loads
+    updateBookingType();
+</script>
+
+</html>

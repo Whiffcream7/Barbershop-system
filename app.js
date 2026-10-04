@@ -35,6 +35,13 @@ app.get('/dashboard', requireLogin, (req, res) => res.render('dashboard'));
 
 // Protected na ang customers: kailangan naka-login
 app.use('/customers', requireLogin, require('./routes/customers'));
+
+// Protected: Admins at staff lang ang may access
+app.use('/appointments', requireRole('admin', 'staff'), require('./routes/appointments'));
+app.use('/queue', requireRole('admin', 'staff'), require('./routes/queue'));
+app.use('/payments', requireRole('admin', 'staff'), require('./routes/payments'));
+app.use('/reports', requireRole('admin'), require('./routes/reports'));
+
 // Admin lang ang may access sa barbers
 app.use('/barbers', requireRole('admin'), require('./routes/barbers'));
 app.use('/services', requireRole('admin'), require('./routes/services'));

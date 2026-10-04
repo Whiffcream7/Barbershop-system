@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+</head>
+<body>
+    <h1>Reports</h1>
+
+    <form method="get" action="/reports">
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" id="date" value="<%= selectedDate %>" required>
+        <button type="submit">View Report</button>
+    </form>
+    
+    <br>
+
+    <h2>Report Summary</h2>
+    <p>
+        Total Appointments: <%= totalAppointments %>
+    </p>
+
+    <p>
+        Total Sales: ₱<%= Number(totalSales).toFixed(2) %>
+    </p>
+
+    <h2>Appointments per Barber</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Barber</th>
+                <th>Appointments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if(barberAppointments.length === 0) { %>
+                <tr>
+                    <td colspan="2">No appoitnments found for this date.</td>
+                </tr>
+            <% } else { %>
+                <% barberAppointments.forEach(barber => { %>
+                    <tr>
+                        <td><%= barber.barber_name %></td>
+                        <td><%= barber.appointment_count %></td>
+                    </tr>
+                <% }) %>
+            <% } %>
+        </tbody>
+    </table>
+
+    <h2>Popular Services</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Services</th>
+                <th>Times Selected</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if(popularServices.length === 0) { %>
+                <tr>
+                    <td colspan="2">No services found for this date.</td>
+                </tr>
+            <% } else { %>
+                <% popularServices.forEach(service => { %>
+                    <tr>
+                        <td><%= service.service_name %></td>
+                        <td><%= service.times_selected %></td>
+                    </tr>
+                <% }) %>
+            <% } %>
+        </tbody>
+    </table>
+</body>
+</html>

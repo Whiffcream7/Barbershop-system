@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Appointment</title>
+</head>
+
+<body>
+    <h1>Edit Appointment</h1>
+
+    <a href="/appointments">Back to Appointments</a>
+
+    <% if (error) { %>
+        <p>
+            <%= error %>
+        </p>
+        <% } %>
+
+            <form method="POST" action="/appointments/edit/<%= appointment.appointment_id %>">
+
+                <label for="customer_id">Customer:</label>
+                <select name="customer_id" id="customer_id" required>
+                    <% customers.forEach(customer=> { %>
+                        <option value="<%= customer.customer_id %>" <%=customer.customer_id==appointment.customer_id ? 'selected' : '' %>>
+                            <%= customer.first_name %>
+                            <%= customer.last_name %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <br><br>
+
+                <label for="barber_id">Barber:</label>
+                <select name="barber_id" id="barber_id" required>
+                    <% barbers.forEach(barber=> { %>
+                        <option value="<%= barber.barber_id %>" <%=barber.barber_id==appointment.barber_id ? 'selected' : '' %>>
+                            <%= barber.first_name%>
+                            <%= barber.last_name %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <br><br>
+
+                <label for="appointment_date">Date:</label>
+                <input type="date" name="appointment_date" id="appointment_date"
+                    value="<%= appointment.appointment_date.toISOString().split('T')[0] %>" required>
+
+                <br><br>
+
+                <label for="start_time">Start Time:</label>
+                <input type="time" name="start_time" id="start_time" value="<%= appointment.start_time %>" required>
+
+                <br><br>
+
+                <label for="end_time">End Time:</label>
+                <input type="text" id="end_time" readonly>
+
+                <br><br>
+
+                <label>Services:</label>
+
+                <% services.forEach(service=> { %>
+                    <div>
+                        <input
+                            type="checkbox"
+                            name="service_ids"
+                            value="<%= service.service_id %>"
+                            id="service_<%= service.service_id %>"
+                            data-duration="<%= service.duration_minutes %>"
+                            <%= selectedServiceIds.includes(service.service_id) ? 'checked' : '' %>
+                        >
+
+                        <label for="service_<%= service.service_id %>">
+                            <%= service.service_name %> - ₱<%= service.price %> (<%= service.duration_minutes %> mins)
+                        </label>
+                    </div>
+                <% }) %>
+
+                    <br>
+                    <button type="submit">Save Changes</button>
+            </form>
+</body>
+
+<script>
+    // Get the start time and end time fields
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+
+    // Get all service checkboxes
+    const serviceCheckboxes = document.querySelectorAll('input[name="service_ids"]');
+
+    // Calculate the end time whenever the start time or selected services change
+    function calculateEndTime() {
+        if (!startTimeInput.value) {
+            endTimeInput.value = '';
+            return;
+        }
+
+        // Get the start time as hours and minutes
+        const [hours, minutes] = startTimeInput.value.split(':').map(Number);
+
+        //Convert the start time to total minutes
+        let totalMinutes = hours * 60 + minutes;
+
+        //Add the duration of every selected service
+        serviceCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                totalMinutes += Number(checkbox.dataset.duration);
+            }
+        });
+
+        // Make sure the appointment does not go into the next day
+        if (totalMinutes >= 24 * 60) {
+            endTimeInput.value = 'Invalid time';
+            return;
+        }
+
+        // Convert the total minutes back to hours and minutes
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMinutes = totalMinutes % 60;
+
+        // Display the calculated time
+        endTimeInput.value = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutes).padStart(2, '0')}`;
+    }    
+    
+    // Recalculate when the start time changes
+    startTimeInput.addEventListener('change', calculateEndTime);
+
+    //Recalculate when a service is selected/unselected
+    serviceCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', calculateEndTime);
+    });
+
+    //Calculate the end time when the edit page first loads
+    calculateEndTime();
+</script>
+
+</html>
