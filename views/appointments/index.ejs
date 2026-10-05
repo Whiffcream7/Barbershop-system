@@ -1,77 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointmetns</title>
+<%- include('../partials/header') %>
 
 
-</head>
+<section class="page-section active-section">
+    <div class="page-heading compact">
+        <div>
+            <p class="eyebrow">APPOINTMENT MANAGEMENT</p>
+            <h2>Appointments</h2>
+            <p class="muted">View, add, update, and cancel appointments.</p>
+        </div>
+        <a class="button primary" href="/appointments/add">+ Add Appointment</a>
+    </div>
+
+    <article class="panel table-panel">
+        <div class="toolbar">
+            <div><strong></strong></div>
+
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Customer</th>
+                        <th>Barber</th>
+                        <th>Services</th>
+                        <th>Booking Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% appointments.forEach(appointment=> { %>
+                        <tr>
+                            <td><%= new Date(appointment.appointment_date).toLocaleString('en-PH', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                            }) %></td>
+                            <td><%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                            }) %></td>
+                            <td><%= new Date(`1970-01-01T${appointment.end_time}`).toLocaleTimeString('en-PH', {
+                                hour: 'numeric',
+                                minute: '2-digit'
+                            }) %></td>
+                            <td><%= appointment.customer_name %></td>
+                            <td><%= appointment.barber_name %></td>
+                            <td><%= appointment.services %></td>
+                            <td><%= appointment.booking_type %></td>
+                            <td><%= appointment.status %></td>
+                            <td>
+                                <% if (appointment.status==='booked' && appointment.booking_type === 'scheduled') { %>
+                                    <div class="action-links">
+                                        <button class="button">
+                                            <a href="/appointments/edit/<%= appointment.appointment_id %>">Edit</a>
+                                        </button>
+                                        
+                                        <form method="post" action="/appointments/status/<%= appointment.appointment_id %>" style="display: inline;">
+                                            <button class="button" type="submit" name="status" value="cancelled">Cancel</button>
+                                        </form>
+
+                                        <form method="post" action="/appointments/status/<%= appointment.appointment_id %>">
+                                            <button class="button" type="submit" name="status" value="no_show">No-show</button>
+                                        </form>
+                                    </div>
+                                    
+                                <% } else { %>
+                                    No actions available
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+</section>
 
 <body>
-    <a href="/dashboard">Back to Dashboard</a>
-    <br><br>
-    <a href="/appointments/add">Add Appointment</a>
-
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Customer</th>
-                <th>Barber</th>
-                <th>Services</th>
-                <th>Booking Type</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <% appointments.forEach(appointment=> { %>
-                <tr>
-                    <td><%= new Date(appointment.appointment_date).toLocaleString('en-PH', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    }) %></td>
-                    <td><%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    }) %></td>
-                    <td><%= new Date(`1970-01-01T${appointment.end_time}`).toLocaleTimeString('en-PH', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    }) %></td>
-                    <td><%= appointment.customer_name %></td>
-                    <td><%= appointment.barber_name %></td>
-                    <td><%= appointment.services %></td>
-                    <td><%= appointment.booking_type %></td>
-                    <td><%= appointment.status %></td>
-                    <td>
-                        <% if (appointment.status==='booked' && appointment.booking_type === 'scheduled') { %>
-                            <a href="/appointments/edit/<%= appointment.appointment_id %>">Edit</a>
-
-                           <form method="post" action="/appointments/status/<%= appointment.appointment_id %>">
-                                <input type="hidden" name="status" value="cancelled">
-                                <button type="submit">Cancelled</button>
-                            </form>
-
-                            <form method="post" action="/appointments/status/<%= appointment.appointment_id %>">
-                                <input type="hidden" name="status" value="no_show">
-                                <button type="submit">No-show</button>
-                            </form>
-                            <% } else { %>
-                                No actions available
-                            <% } %>
-                    </td>
-                </tr>
-                <% }) %>
-        </tbody>
-    </table>
+    
 </body>
-
-</html>

@@ -19,11 +19,15 @@
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a href="/dashboard">Dashboard</a>
         <a href="/customers">Customers</a>
+        <a href="/appointments">Appointments</a>
+        <a href="/queue">Queue</a>
+        <a href="/payments">Payments</a>
         <!-- Add Appointments, Queue, Payments here once M4's routes exist -->
         <% if (currentUser.role === 'admin') { %>
           <a href="/barbers">Barbers</a>
           <a href="/services">Services</a>
           <a href="/users">Users</a>
+          <a href="/reports">Reports</a>
         <% } %>
       </nav>
 
