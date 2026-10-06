@@ -202,6 +202,9 @@ button{cursor:pointer}
 .graphic-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold-2);box-shadow:0 0 0 7px rgba(217,180,125,.06)}
 .dot-one{right:196px;bottom:166px}.dot-two{right:127px;bottom:127px}
 
+/*
+CSS DESIGN CONTENT FOR CARDS(GALLERY O MGA CARDS)
+*/
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
 .stats-three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .stat-card{display:flex;align-items:center;gap:13px;padding:16px;border:1px solid var(--line);background:rgba(17,25,35,.73);border-radius:17px;transition:.18s ease}
@@ -210,6 +213,9 @@ button{cursor:pointer}
 .stat-icon.gold{background:rgba(217,180,125,.10);color:var(--gold-2)}.stat-icon.green{background:rgba(119,213,169,.09);color:var(--green)}.stat-icon.blue{background:rgba(139,185,238,.09);color:var(--blue)}.stat-icon.rose{background:rgba(235,154,154,.09);color:var(--rose)}
 .stat-card span{display:block;color:var(--muted);font-size:.72rem}.stat-card strong{display:block;font-size:1.25rem;margin-top:2px}.stat-card small{display:block;color:#81909e;font-size:.66rem;margin-top:2px}
 
+/*
+CSS CONTENT FOR DASHBOARD PAGE 
+*/
 .dashboard-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-top:14px}
 .panel{border:1px solid var(--line);background:rgba(17,25,35,.78);border-radius:var(--radius);box-shadow:0 12px 34px rgba(0,0,0,.12)}
 .panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
@@ -240,6 +246,9 @@ button{cursor:pointer}
 .requirement-grid div{padding:13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.02)}
 .requirement-grid span{font-size:.66rem;color:var(--gold-2);font-weight:800}.requirement-grid p{font-size:.71rem;color:var(--muted);margin:6px 0 0}.requirement-grid strong{color:var(--text)}
 
+/*
+CSS CONTENT FOR TABLE DESIGN
+*/
 .table-panel{padding:0!important;overflow:hidden}
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:21px 22px;border-bottom:1px solid var(--line)}
 .toolbar>div:first-child strong{display:block;font-size:.86rem}.toolbar>div:first-child small{display:block;color:var(--muted);font-size:.68rem;margin-top:2px}
@@ -292,6 +301,9 @@ textarea{resize:vertical;min-height:90px}
 .requirements-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.requirement-card{padding:17px;border:1px solid var(--line);border-radius:15px;background:rgba(17,25,35,.72)}.requirement-card span{font-size:.62rem;color:var(--gold-2);font-weight:800;letter-spacing:.12em}.requirement-card strong{display:block;font-size:.85rem;margin-top:8px}.requirement-card p{font-size:.69rem;color:var(--muted);margin:5px 0 0}
 .footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding:18px 0 30px;color:#7f8d9a;font-size:.68rem}
 
+/*
+CONTENT FOR RESPONSIVE WEB
+*/
 @media (max-width:1180px){
   .desktop-nav{display:none}.mobile-menu{display:block}.topbar-inner{justify-content:space-between}
   .mobile-nav{display:none}.mobile-nav.open{display:grid}
@@ -331,4 +343,80 @@ textarea{resize:vertical;min-height:90px}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *{transition:none!important}
+}
+
+/*
+ CSS CONTENTS FOR MODAL
+*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(7, 11, 16, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.modal-card {
+  width: min(440px, 100%);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(17, 25, 35, 0.94);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+}
+
+.modal-warning .modal-icon {
+  background: rgba(228, 187, 118, 0.12);
+  color: var(--amber);
+  border: 1px solid rgba(228, 187, 118, 0.25);
+}
+
+.modal-danger .modal-icon {
+  background: rgba(235, 154, 154, 0.12);
+  color: var(--rose);
+  border: 1px solid rgba(235, 154, 154, 0.25);
+}
+
+.modal-info .modal-icon {
+  background: rgba(139, 185, 238, 0.12);
+  color: var(--blue);
+  border: 1px solid rgba(139, 185, 238, 0.25);
+}
+
+.modal-content h3 {
+  font-family: Manrope, sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  margin: 4px 0 8px;
+}
+
+.modal-message {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
