@@ -146,7 +146,7 @@ button{cursor:pointer}
   display:flex;align-items:center;gap:9px;border:1px solid var(--line);
   background:rgba(255,255,255,.03);padding:5px 9px 5px 5px;border-radius:999px;min-width:0;
 }
-.name{color: darkorange;}
+.name{color: darkorange; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; font-style: oblique;}
 .avatar{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:var(--panel-3);border:1px solid var(--line);color:var(--gold-2);font-weight:800}
 .profile-copy{display:flex;flex-direction:column;line-height:1.05;max-width:130px}
 .profile-copy strong{font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
