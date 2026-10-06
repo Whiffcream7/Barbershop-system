@@ -23,8 +23,6 @@
         <p>Sign in with a registered account to access the system according to your assigned role.</p>
       </div>
 
-      <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
-
       <form class="login-form" method="POST" action="/login">
         <label>Username *
           <input type="text" name="username" autocomplete="username" placeholder="Enter username" required>
@@ -34,6 +32,9 @@
         </label>
         <button class="button primary full-width" type="submit">Sign in</button>
       </form>
+
+      <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
     </section>
   </div>
 </body>

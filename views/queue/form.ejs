@@ -1,0 +1,73 @@
+<%- include('../partials/header') %>
+
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">QUEUE MANAGEMENT</p>
+      <h2><%= queue.queue_id ? 'Edit' : 'Add' %> queue entry</h2>
+    </div>
+    <a class="button secondary" href="/queue">Back to queue</a>
+  </div>
+
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">QUEUE TICKET</p><h3><%= queue.queue_id ? 'Edit' : 'Add' %> entry</h3></div>
+      <span class="required-note">* Required</span>
+    </div>
+
+    <form method="POST" action="<%= action %>">
+      <div class="form-grid">
+        <label>Customer *
+          <select name="customer_id" required>
+            <option value="">-- Select Customer --</option>
+            <% customers.forEach(c => { %>
+              <option value="<%= c.customer_id %>" <%= (queue.customer_id == c.customer_id) ? 'selected' : '' %>>
+                <%= c.first_name %> <%= c.last_name %> (<%= c.phone %>)
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>Service *
+          <select name="service_id" required>
+            <option value="">-- Select Service --</option>
+            <% services.forEach(s => { %>
+              <option value="<%= s.service_id %>" <%= (queue.service_id == s.service_id) ? 'selected' : '' %>>
+                <%= s.service_name %> ($<%= s.price %>)
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>Assigned Barber
+          <select name="barber_id">
+            <option value="">-- Any Available Barber --</option>
+            <% barbers.forEach(b => { %>
+              <option value="<%= b.barber_id %>" <%= (queue.barber_id == b.barber_id) ? 'selected' : '' %>>
+                <%= b.first_name %> <%= b.last_name %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>Status *
+          <select name="status" required>
+            <option value="waiting" <%= queue.status === 'waiting' ? 'selected' : '' %>>Waiting</option>
+            <option value="in_service" <%= queue.status === 'in_service' ? 'selected' : '' %>>In Service</option>
+            <option value="completed" <%= queue.status === 'completed' ? 'selected' : '' %>>Completed</option>
+            <option value="cancelled" <%= queue.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <a class="button secondary" href="/queue">Cancel</a>
+        <button class="button primary" type="submit">Save queue entry</button>
+      </div>
+    </form>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>
