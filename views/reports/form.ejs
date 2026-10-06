@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">REPORTS & ANALYTICS</p>
+      <h2>Generate report</h2>
+    </div>
+    <a class="button secondary" href="/reports">Back to dashboard</a>
+  </div>
+
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">REPORT CONFIGURATION</p><h3>Filter report parameters</h3></div>
+      <span class="required-note">* Required</span>
+    </div>
+
+    <form method="GET" action="/reports/generate">
+      <div class="form-grid">
+        <label>Report Type *
+          <select name="report_type" required>
+            <option value="sales" <%= filters.report_type === 'sales' ? 'selected' : '' %>>Total Revenue & Sales</option>
+            <option value="barber_performance" <%= filters.report_type === 'barber_performance' ? 'selected' : '' %>>Barber Performance</option>
+            <option value="popular_services" <%= filters.report_type === 'popular_services' ? 'selected' : '' %>>Popular Services</option>
+            <option value="customer_activity" <%= filters.report_type === 'customer_activity' ? 'selected' : '' %>>Customer Visits</option>
+          </select>
+        </label>
+
+        <label>Barber (Optional)
+          <select name="barber_id">
+            <option value="">All Barbers</option>
+            <% barbers.forEach(b => { %>
+              <option value="<%= b.barber_id %>" <%= (filters.barber_id == b.barber_id) ? 'selected' : '' %>>
+                <%= b.first_name %> <%= b.last_name %>
+              </option>
+            <% }) %>
+          </select>
+        </label>
+
+        <label>Start Date *
+          <input type="date" name="start_date" value="<%= filters.start_date || '' %>" required>
+        </label>
+
+        <label>End Date *
+          <input type="date" name="end_date" value="<%= filters.end_date || '' %>" required>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <a class="button secondary" href="/reports">Reset</a>
+        <button class="button primary" type="submit">Generate Report</button>
+      </div>
+    </form>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>
