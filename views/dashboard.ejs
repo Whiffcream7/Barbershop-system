@@ -4,7 +4,7 @@
   <div class="page-heading">
     <div>
       <p class="eyebrow">CONTROL CENTER</p>
-      <h1>Good day, <%= currentUser.full_name %>.</h1>
+      <h1>Good day, <h1 class="name"><%= currentUser.full_name %></h1>.</h1>
       <p class="muted">Signed in as <%= currentUser.role === 'admin' ? 'Administrator' : 'Staff / Receptionist' %>.</p>
     </div>
     <div class="heading-actions">
