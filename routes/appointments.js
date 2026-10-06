@@ -6,8 +6,61 @@ const pool = require('../config/db');
 // GET /appointments
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.execute(
-            `SELECT
+        // Get filter values from the URL
+        const date = req.query.date || 'all';
+        const status = req.query.status || 'all';
+        const bookingType = req.query.booking_type || 'all';
+        const sort = req.query.sort || 'date';
+        const order = req.query.order || 'asc';
+
+        // Store WHERE conditions and their values
+        const conditions = [];
+        const params = [];
+
+        // Date filter
+        if (date === 'today') {
+            conditions.push('a.appointment_date = CURDATE()');
+        } else if (date === 'week') {
+            conditions.push(
+                'YEARWEEK(a.appointment_date, 1) = YEARWEEK(CURDATE(), 1)'
+            );
+        } else if (date === 'month') {
+            conditions.push(
+                'YEAR(a.appointment_date) = YEAR(CURDATE()) AND MONTH(a.appointment_date) = MONTH(CURDATE())'
+            );
+        } else if (date === 'older') {
+            conditions.push('a.appointment_date < CURDATE()');
+        }
+
+        // Status filter
+        if (status !== 'all') {
+            conditions.push('a.status = ?');
+            params.push(status);
+        }
+
+        // Booking type filter
+        if (bookingType !== 'all') {
+            conditions.push('a.booking_type = ?');
+            params.push(bookingType);
+        }
+
+        // Whitelist allowed sorting columns
+        const sortOptions = {
+            date: 'a.appointment_date',
+            start: 'a.start_time',
+            end: 'a.end_time',
+            customer: 'c.last_name',
+            barber: 'b.last_name'
+        };
+
+        const sortColumn = sortOptions[sort] || sortOptions.date;
+
+        // Only allow ASC or DESC
+        const sortOrder = order === 'desc' ? 'DESC' : 'ASC';
+
+        // Start the SQL query
+        let query = `
+            SELECT
                 a.appointment_id,
                 a.appointment_date,
                 a.start_time,
@@ -26,6 +79,14 @@ router.get('/', async (req, res) => {
                 ON a.appointment_id = aps.appointment_id
             JOIN services s
                 ON aps.service_id = s.service_id
+        `;
+
+        // Add WHERE only when filters are being used
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+
+        query += `
             GROUP BY
                 a.appointment_id,
                 a.appointment_date,
@@ -37,17 +98,37 @@ router.get('/', async (req, res) => {
                 c.last_name,
                 b.first_name,
                 b.last_name
-            ORDER BY a.appointment_date, a.start_time`
-        );
+        `;
+
+        // Add sorting
+        if (sort === 'customer') {
+            query += `ORDER BY c.first_name ${sortOrder}`;
+        } else if (sort === 'barber') {
+            query += `ORDER BY b.first_name ${sortOrder}`;
+        } else if (sort === 'start') {
+            query += `ORDER BY a.start_time ${sortOrder}`;
+        } else if (sort === 'end') {
+            query += `ORDER BY a.end_time ${sortOrder}`;
+        } else {
+            query += `ORDER BY a.appointment_date ${sortOrder}`;
+        }
+
+        const [rows] = await pool.execute(query, params);
 
         res.render('appointments/index', {
             appointments: rows,
-            error: null
+            error: null,
+            selectedDate: date,
+            selectedStatus: status,
+            selectedBookingType: bookingType,
+            selectedSort: sort,
+            selectedOrder: order
         });
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Something went wrong.');
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).send('Error loading appointments.');
     }
 });
 
