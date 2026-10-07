@@ -161,7 +161,7 @@ router.get('/add', async (req, res) => {
             customers,
             barbers,
             services,
-            error: null,
+            error: req.query.error || null,
             action: '/appointments/add'
         });
     } catch (err) {
@@ -175,6 +175,9 @@ router.get('/add', async (req, res) => {
 router.get('/edit/:id', async (req, res) => {
     try {
         const appointmentId = req.params.id;
+
+        const fail = (message) =>
+        res.redirect(`/appointments/edit/${appointmentId}?error=` + encodeURIComponent(message));
 
         // Get the appointment
         const [appointments] = await pool.execute(
@@ -192,12 +195,12 @@ router.get('/edit/:id', async (req, res) => {
 
         // Only booked appointments can be edited
         if (appointment.status !== 'booked') {
-            return res.status(400).send('Only booked appointmetns can be edited.');
+            return fail('Only booked appointmetns can be edited.');
         }
 
         //Walk-in appointments cannot be edited
         if (appointment.booking_type === 'walk_in') {
-            return res.status(400).send('Walk-in appointments cannot be edited.');
+            return fail('Walk-in appointments cannot be edited.');
         }
 
         // Get customers
@@ -240,7 +243,7 @@ router.get('/edit/:id', async (req, res) => {
             barbers,
             services,
             selectedServiceIds,
-            error: null
+            error: req.query.error || null
         });
     } catch (err) {
         console.error(err);
@@ -251,6 +254,9 @@ router.get('/edit/:id', async (req, res) => {
 // Add appointment
 // POST /appointments/add
 router.post('/add', async (req, res) => {
+    const fail = (message) =>
+        res.redirect('/appointments/add?error=' + encodeURIComponent(message));
+
     let {
         customer_id,
         barber_id,
@@ -263,7 +269,7 @@ router.post('/add', async (req, res) => {
     try {
         // Makes sure the booking type is valid
         if (!['scheduled', 'walk_in'].includes(booking_type)) {
-            return res.status(400).send('Invalid booking type.');
+            return fail('Invalid booking type.');
         }
 
         // Walk-ins use the current date and time
@@ -282,7 +288,7 @@ router.post('/add', async (req, res) => {
             !appointment_date ||
             !start_time
         ) {
-            return res.status(400).send('All appointment fields are required.');
+            return fail('All appointment fields are required.');
         }
 
         // Makes sure at least one service is selected
@@ -293,7 +299,7 @@ router.post('/add', async (req, res) => {
                 : [];
         
         if (selectedServices.length === 0) {
-            return res.status(400).send('Please select at least one service.');
+            return fail('Please select at least one service.');
         }
 
         // 2. Checks date or time
@@ -305,7 +311,7 @@ router.post('/add', async (req, res) => {
             );
             
             if (appointmentDateTime < now) {
-                return res.status(400).send('Appointment date and time cannot be in the past.');
+                return fail('Appointment date and time cannot be in the past.');
             }
         }
 
@@ -316,7 +322,7 @@ router.post('/add', async (req, res) => {
         );
 
         if (customers.length === 0) {
-            return res.status(400).send('Customer dose not exist.');
+            return fail('Customer dose not exist.');
         }
 
         // 4. Check barber
@@ -330,7 +336,7 @@ router.post('/add', async (req, res) => {
         );
         
         if (barbers.length === 0) {
-            return res.status(400).send('Selected barber is not available.');
+            return fail('Selected barber is not available.');
         }
 
         // 5. Check services
@@ -347,7 +353,7 @@ router.post('/add', async (req, res) => {
 
         // Makes sure every selected service was found and active
         if (services.length !== selectedServices.length) {
-            return res.status(400).send('One or more selected services are unavailable.');
+            return fail('One or more selected services are unavailable.');
         }
 
         // Add the duration of all selected services
@@ -364,7 +370,7 @@ router.post('/add', async (req, res) => {
 
         // Prevent an appointment from extending into the next day
         if (endMinutes >= 24 * 60) {
-            return res.status(400).send('Appointment cannot extend into the next day.');
+            return fail('Appointment cannot extend into the next day.');
         }
 
         // Convert the calculated minutes back into HH:MM:SS format
@@ -374,7 +380,7 @@ router.post('/add', async (req, res) => {
         const end_time = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutesPart).padStart(2, '0')}:00`;
 
         // 6. Check double booking
-        const [conflicts] = await pool.execute(
+        const [barberConflicts] = await pool.execute(
             `SELECT appointment_id
             FROM appointments
             WHERE barber_id = ?
@@ -390,8 +396,28 @@ router.post('/add', async (req, res) => {
             ]
         );
 
-        if (conflicts.length > 0) {
-            return res.status(400).send('The barber already has an appointment during that time.');
+        if (barberConflicts.length > 0) {
+            return fail('The barber already has an appointment during that time.');
+        }
+
+        const [customerConflicts] = await pool.execute(
+            `SELECT appointment_id
+            FROM appointments
+            WHERE customer_id = ?
+            AND appointment_date = ?
+            AND status = 'booked'
+            AND start_time < ?
+            AND end_time > ?`,
+            [
+                customer_id,
+                appointment_date,
+                end_time,
+                start_time
+            ]
+        );
+
+        if (customerConflicts.length > 0) {
+            return fail('The customer already has an appointment during that time.');
         }
 
         // 7. Create appointment
@@ -508,6 +534,9 @@ router.post('/status/:id', async (req, res) => {
 router.post('/edit/:id', async (req, res) => {
     const appointmentId = req.params.id;
 
+    const fail = (message) =>
+        res.redirect(`/appointments/edit/${appointmentId}?error=` + encodeURIComponent(message));
+
     const {
         customer_id,
         barber_id,
@@ -527,19 +556,19 @@ router.post('/edit/:id', async (req, res) => {
 
         // Makes sure the appointment exists
         if (appointments.length === 0) {
-            return res.status(400).send('Appointment not found.');
+            return fail('Appointment not found.');
         }
         
         const appointment = appointments[0];
 
         // Only booked appointments can be edited
         if (appointment.status !== 'booked') {
-            return res.status(400).send('Only booked appointments can be edited.');
+            return fail('Only booked appointments can be edited.');
         }
 
         // Walk-in appointments cannot be edited
         if (appointment.booking_type === 'walk_in') {
-            return res.status(400).send('Walk-in appointments cannot be edited.');
+            return fail('Walk-in appointments cannot be edited.');
         }
         
         //  1. Basic Validation
@@ -549,7 +578,7 @@ router.post('/edit/:id', async (req, res) => {
             !appointment_date ||
             !start_time
         ) {
-            return res.status(400).send('All appointment fields are required.');
+            return fail('All appointment fields are required.');
         }
 
         // Makes sure at least one service is selected
@@ -560,7 +589,7 @@ router.post('/edit/:id', async (req, res) => {
                 : [];
         
         if (selectedServices.length === 0) {
-            return res.status(400).send('Please select at least one service.');
+            return fail('Please select at least one service.');
         }
 
         // 2. Checks date or time
@@ -572,7 +601,7 @@ router.post('/edit/:id', async (req, res) => {
         );
         
         if (appointmentDateTime < now) {
-            return res.status(400).send('Appointment date and time cannot be in the past.');
+            return fail('Appointment date and time cannot be in the past.');
         }
 
         // 3. Check customer
@@ -582,7 +611,7 @@ router.post('/edit/:id', async (req, res) => {
         );
 
         if (customers.length === 0) {
-            return res.status(400).send('Customer dose not exist.');
+            return fail('Customer dose not exist.');
         }
 
         // 4. Check barber
@@ -596,7 +625,7 @@ router.post('/edit/:id', async (req, res) => {
         );
         
         if (barbers.length === 0) {
-            return res.status(400).send('Selected barber is not available.');
+            return fail('Selected barber is not available.');
         }
 
         // 5. Check services
@@ -613,7 +642,7 @@ router.post('/edit/:id', async (req, res) => {
 
         // Makes sure every selected service was found and active
         if (services.length !== selectedServices.length) {
-            return res.status(400).send('One or more selected services are unavailable.');
+            return fail('One or more selected services are unavailable.');
         }
 
         // Calculate the total duration of all selected services
@@ -630,7 +659,7 @@ router.post('/edit/:id', async (req, res) => {
 
         // Prevent the appointment from going into the next day
         if (endMinutes >= 24 * 60) {
-            return res.status(400).send('Appointment cannot extend into the next day.');
+            return fail('Appointment cannot extend into the next day.');
         }
 
         // Convert the calculated minutes back into HH:MM:SS
@@ -640,7 +669,7 @@ router.post('/edit/:id', async (req, res) => {
         const end_time = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutesPart).padStart(2, '0')}:00`;
 
         // 6. Check double booking
-        const [conflicts] = await pool.execute(
+        const [barberConflicts] = await pool.execute(
             `SELECT appointment_id
             FROM appointments
             WHERE barber_id = ?
@@ -658,8 +687,30 @@ router.post('/edit/:id', async (req, res) => {
             ]
         );
 
-        if (conflicts.length > 0) {
-            return res.status(400).send('The barber already has an appointment during that time.');
+        if (barberConflicts.length > 0) {
+            return fail('The barber already has an appointment during that time.');
+        }
+
+        const [customerConflicts] = await pool.execute(
+            `SELECT appointment_id
+            FROM appointments
+            WHERE customer_id = ?
+            AND appointment_date = ?
+            AND status = 'booked'
+            AND appointment_id != ?
+            AND start_time < ?
+            AND end_time > ?`,
+            [
+                customer_id,
+                appointment_date,
+                appointmentId,
+                end_time,
+                start_time
+            ]
+        );
+
+        if (customerConflicts.length > 0) {
+            return fail('The customer already has an appointment during that time.');
         }
 
         // 7. Start transaction

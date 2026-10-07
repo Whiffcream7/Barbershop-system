@@ -9,8 +9,6 @@
         <a class="button secondary" href="/appointments">Back to list</a>
     </div>
 
-    <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
-
     <article class="panel form-panel">
         <div class="panel-heading">
             <div><p class="eyebrow">APPOINTMENT RECORD</p></div>
@@ -59,7 +57,8 @@
                 </label>
 
                 <!-- Start Time -->
-                <label for="start_time">Start Time:
+                <label for="start_time">
+                    <span id="startTimeLabel">Start Time:</span>
                     <input type="time" name="start_time" id="start_time" required>
                 </label>
                 
@@ -192,6 +191,25 @@
 
     // Set the correct fields when the form first loads
     updateBookingType();
+</script>
+
+<%- include('../partials/modal') %>
+
+<script>
+    const errorMessage = <%- JSON.stringify(error || '') %>;
+
+    if (errorMessage) {
+        document.getElementById('modalMessage').textContent = errorMessage;
+        document.getElementById('appModal').classList.remove('hidden');
+    }
+
+    document.getElementById('modalCancelBtn').addEventListener('click', () => {
+        document.getElementById('appModal').classList.add('hidden');
+    });
+
+    document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+        document.getElementById('appModal').classList.add('hidden');
+    });
 </script>
 
 <%- include('../partials/footer') %>
