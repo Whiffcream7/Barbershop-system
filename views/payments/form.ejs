@@ -1,68 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Payment</title>
-</head>
-<body>
-    <h1>Record Payment</h1>
+<%- include('../partials/header') %>
+
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">PAYMENTS</p>
+      <h2>Record payment</h2>
+    </div>
+    <a class="button secondary" href="/payments">Back to list</a>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">PAYMENT RECORD</p><h3>Record payment</h3></div>
+      <span class="required-note">* Required</span>
+    </div>
 
     <form method="post" action="/payments/add">
-        <label for="appointment_id">Appointment ID:</label>
-        <select name="appointment_id" id="appointment_id" required>
+      <div class="form-grid">
+        <label>Appointment *
+          <select name="appointment_id" id="appointment_id" required>
             <option value="">Select an appointment</option>
 
             <% appointments.forEach(appointment => { %>
-                <option value="<%= appointment.appointment_id %>" data-total="<%= appointment.total_amount || 0 %>">
-                    #<%= appointment.appointment_id %> -
-                    <%= appointment.customer_name %> -
-                    <%= new Date(appointment.appointment_date).toLocaleDateString('en-PH', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                    }) %>
-                    <%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                    }) %>
-                    - ₱<%= Number(appointment.total_amount || 0).toFixed(2) %>
-                </option>
+              <option value="<%= appointment.appointment_id %>" data-balance="<%= Number(appointment.balance).toFixed(2) %>">
+                #<%= appointment.appointment_id %> -
+                <%= appointment.customer_name %> -
+                <%= new Date(appointment.appointment_date).toLocaleDateString('en-PH', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                }) %>
+                <%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                }) %>
+                - Balance ₱<%= Number(appointment.balance).toFixed(2) %> (total ₱<%= Number(appointment.total_amount).toFixed(2) %>, paid ₱<%= Number(appointment.paid_amount).toFixed(2) %>)
+              </option>
             <% }) %>
-        </select>
+          </select>
+        </label>
 
-        <br><br>
+        <label>Amount (₱) *
+          <input type="number" name="amount" id="amount" step="0.01" min="0.01" required>
+          <small class="muted">Defaults to the remaining balance. Enter a smaller amount for a partial payment.</small>
+        </label>
 
-        <label for="amount">Amount:</label>
-        <input type="number" name="amount" id="amount"  step="0.01" min="0" required readonly>
-
-        <br><br>
-
-        <label for="payment_method">Payment Method:</label>
-        <select name="payment_method" id="payment_method" required>
+        <label>Payment method *
+          <select name="payment_method" id="payment_method" required>
             <option value="">Select payment method</option>
             <option value="cash">Cash</option>
             <option value="gcash">GCash</option>
-        </select>
+          </select>
+        </label>
+      </div>
 
-        <br><br>
-
-        <button type="submit">Record Payment</button>
-
-        <a href="/payments">Cancel</a>
+      <div class="form-actions">
+        <a class="button secondary" href="/payments">Cancel</a>
+        <button class="button primary" type="submit">Record payment</button>
+      </div>
     </form>
+  </article>
+</section>
 
-    <script>
-        const appointmentSelect = document.getElementById('appointment_id');
-        const amountInput = document.getElementById('amount');
+<script>
+  const appointmentSelect = document.getElementById('appointment_id');
+  const amountInput = document.getElementById('amount');
 
-        appointmentSelect.addEventListener('change', function() {
-            const selectedOption = appointmentSelect.options[appointmentSelect.selectedIndex];
-            const total = selectedOption.dataset.total;
+  appointmentSelect.addEventListener('change', function() {
+    const selectedOption = appointmentSelect.options[appointmentSelect.selectedIndex];
+    const balance = selectedOption.dataset.balance;
 
-            amountInput.value = total || '';
-        });
-    </script>
-</body>
-</html>
+    amountInput.value = balance || '';
+    amountInput.max = balance || '';
+  });
+</script>
+
+<%- include('../partials/footer') %>

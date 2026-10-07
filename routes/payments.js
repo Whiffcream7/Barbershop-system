@@ -42,30 +42,40 @@ router.get('/', async (req, res) => {
 })
 
 // Show the record payment form
-// GET /payment/add
+// GET /payments/add
 router.get('/add', async (req, res) => {
     try {
-        // Get booked and completed appointments that can have a payment
+        // Get booked and completed appointments that still have a balance to pay
         const [appointments] = await pool.execute(
             `SELECT
                 a.appointment_id,
                 CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
                 a.appointment_date,
                 a.start_time,
-                    (
-                        SELECT SUM(aps.price_at_booking)
-                        FROM appointment_services aps
-                        WHERE aps.appointment_id = a.appointment_id
-                    ) AS total_amount
+                COALESCE(t.total_amount, 0) AS total_amount,
+                COALESCE(p.paid_amount, 0) AS paid_amount,
+                COALESCE(t.total_amount, 0) - COALESCE(p.paid_amount, 0) AS balance
             FROM appointments a
             JOIN customers c
                 ON a.customer_id = c.customer_id
+            LEFT JOIN (
+                SELECT appointment_id, SUM(price_at_booking) AS total_amount
+                FROM appointment_services
+                GROUP BY appointment_id
+            ) t ON t.appointment_id = a.appointment_id
+            LEFT JOIN (
+                SELECT appointment_id, SUM(amount) AS paid_amount
+                FROM payments
+                GROUP BY appointment_id
+            ) p ON p.appointment_id = a.appointment_id
             WHERE a.status IN ('booked', 'completed')
-            ORDER BY a.appointment_date DESC, a.start_time DESC`, []
+                AND COALESCE(t.total_amount, 0) - COALESCE(p.paid_amount, 0) > 0
+            ORDER BY a.appointment_date DESC, a.start_time DESC`
         );
 
         res.render('payments/form', {
-            appointments
+            appointments,
+            error: req.query.error || null
         });
     } catch (err) {
         console.error(err);
@@ -73,27 +83,31 @@ router.get('/add', async (req, res) => {
     }
 });
 
-// Record a payment
-// POST /paymenmt/add
+// Record a payment (full or partial)
+// POST /payments/add
 router.post('/add', async (req, res) => {
-    try {
-        const {appointment_id, amount, payment_method} = req.body;
+    // Show the error on the form page instead of a blank text page
+    const fail = (message) =>
+        res.redirect('/payments/add?error=' + encodeURIComponent(message));
 
-        // Basic validation\
+    try {
+        const { appointment_id, amount, payment_method } = req.body;
+
+        // Basic validation
         if (!appointment_id || !amount || !payment_method) {
-            return res.status(400).send('All payment fields are required.');
+            return fail('All payment fields are required.');
         }
 
-        // Makes sure the payment amount is a valid postive integer
+        // Makes sure the payment amount is a valid positive number
         const paymentAmount = Number(amount);
 
-        if(isNaN(paymentAmount) || paymentAmount <= 0) {
-            return res.status(400).send('Payment amount must be greater than zero.');
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            return fail('Payment amount must be greater than zero.');
         }
 
         // Validate payment method
         if (!['cash', 'gcash'].includes(payment_method)) {
-            return res.status(400).send('Invalid payment method.');
+            return fail('Invalid payment method.');
         }
 
         // Get the appointment
@@ -105,47 +119,51 @@ router.post('/add', async (req, res) => {
         );
 
         if (appointments.length === 0) {
-            return res.status(400).send('Appointment not found.');
+            return fail('Appointment not found.');
         }
 
         // Payments are not allowed for cancelled or no-show appointments
         if (appointments[0].status === 'cancelled' || appointments[0].status === 'no_show') {
-            return res.status(400).send('Payments cannot be recorded for cancelled or no-show appointments.');
+            return fail('Payments cannot be recorded for cancelled or no-show appointments.');
         }
 
-        // Checks if this appointment already has a payment
-        const [existingPayments] = await pool.execute(
-            `SELECT payment_id
-            FROM payments
-            WHERE appointment_id = ?`,
-            [appointment_id]
-        );
-
-        if (existingPayments.length > 0) {
-            return res.status(400).send('A payment has already been recorded for this appointment.');
-        }
-
-        // Get the total price of the services for this appointment
+        // Total price of the services for this appointment
         const [services] = await pool.execute(
-            `SELECT SUM(price_at_booking) AS total_amount
+            `SELECT COALESCE(SUM(price_at_booking), 0) AS total_amount
             FROM appointment_services
             WHERE appointment_id = ?`,
             [appointment_id]
         );
 
-        const totalAmount = Number(services[0].total_amount || 0);
+        // Total already paid for this appointment
+        const [paid] = await pool.execute(
+            `SELECT COALESCE(SUM(amount), 0) AS paid_amount
+            FROM payments
+            WHERE appointment_id = ?`,
+            [appointment_id]
+        );
 
-        // Makes sure the payment amount matches the appointment total
-        if (paymentAmount !== totalAmount) {
-            return res.status(400).send(`Payment amount must match the appointment total of ₱${totalAmount.toFixed(2)}.`);
+        // Work in centavos to avoid decimal rounding problems
+        const totalCents = Math.round(Number(services[0].total_amount) * 100);
+        const paidCents = Math.round(Number(paid[0].paid_amount) * 100);
+        const balanceCents = totalCents - paidCents;
+        const amountCents = Math.round(paymentAmount * 100);
+
+        if (balanceCents <= 0) {
+            return fail('This appointment is already fully paid.');
+        }
+
+        // Partial payments are allowed, but not more than the remaining balance
+        if (amountCents > balanceCents) {
+            return fail(`Payment cannot be more than the remaining balance of ₱${(balanceCents / 100).toFixed(2)}.`);
         }
 
         // Record the payment
         await pool.execute(
-                `INSERT INTO payments
-                    (appointment_id, received_by, amount, payment_method)
-                VALUES (?, ?, ?, ?)`,
-                [appointment_id, req.session.user.user_id, paymentAmount, payment_method]
+            `INSERT INTO payments
+                (appointment_id, received_by, amount, payment_method)
+            VALUES (?, ?, ?, ?)`,
+            [appointment_id, req.session.user.user_id, amountCents / 100, payment_method]
         );
 
         // Return to the payments page
