@@ -1,4 +1,4 @@
-// Business rule #10: bawat protected page ay kailangan ng login
+// Business rule #10: every protected page needs a login
 function requireLogin(req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login');
@@ -6,8 +6,8 @@ function requireLogin(req, res, next) {
   next();
 }
 
-// Business rule #9: para sa admin-only pages
-// Gamit: router.get('/', requireRole('admin'), ...)
+// Business rule #9: for admin-only pages
+// Usage: router.get('/', requireRole('admin'), ...)
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.session.user) {

@@ -1,14 +1,15 @@
-// Kinukuha ang mysql2 na may promise support para magamit ang async/await
+// mysql2 with promises so we can use async/await
 const mysql = require('mysql2/promise');
 
-// Pool = grupo ng connections na pwedeng gamitin ulit
+// pool of database connections
 const pool = mysql.createPool({
   host: 'localhost',
-  user: 'root',          // default ng XAMPP
-  password: '',          // default ng XAMPP ay walang password
+  user: 'root',          // XAMPP default
+  password: '',          // XAMPP default is empty
   database: 'barbershop_db',
   waitForConnections: true,
   connectionLimit: 10
 });
 
+// used by the other files to run queries
 module.exports = pool;

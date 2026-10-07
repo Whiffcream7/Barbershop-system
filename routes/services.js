@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 
-// Sinusuri ang input ng form. Ibinabalik ang error message, o null kung okay
+// checks the form input, returns an error message or null if it's okay
 function validateService(body) {
   const { service_name, price, duration_minutes } = body;
   if (!service_name.trim()) return 'Service name is required.';
@@ -102,7 +102,7 @@ router.post('/delete/:id', async (req, res) => {
     await pool.execute('DELETE FROM services WHERE service_id = ?', [req.params.id]);
     res.redirect('/services');
   } catch (err) {
-    // Business rule #8: nagamit na ang service sa appointments, friendly error lang
+    // Business rule #8: service is already used in appointments, so show a friendly error
     if (err.code === 'ER_ROW_IS_REFERENCED_2') {
       const [rows] = await pool.execute('SELECT * FROM services ORDER BY service_name');
       return res.render('services/index', {
