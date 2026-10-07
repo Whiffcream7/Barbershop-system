@@ -86,7 +86,7 @@ router.get('/', async (req, res) => {
         res.render('queue/index', {
             queue: queueRows,
             appointments: appointmentRows,
-            error: null
+            error: req.query.error || null
         });
     } catch (err) {
         console.error(err);
@@ -110,7 +110,7 @@ router.post('/add/:id',  async (req, res) => {
         );
 
         if (appointments.length === 0) {
-            return res.status(400).send('Invalid appointment.');
+            return res.redirect('/queue?error=' + encodeURIComponent('Invalid appointment.'));
         }
 
         // Check if the appointment is already in the queue
@@ -122,7 +122,7 @@ router.post('/add/:id',  async (req, res) => {
         );
 
         if (existing.length > 0) {
-            return res.status(400).send('This appointment is already in the queue.');
+            return res.redirect('/queue?error=' + encodeURIComponent('This appointment is already in the queue.'));
         }
 
         // Find today's highest queue number
@@ -169,14 +169,14 @@ router.post('/serve/:id', async (req, res) => {
         );
 
         if(queueRows.length === 0) {
-            return res.status(400).send('Queue entry not found.');
+            return res.redirect('/queue?error=' + encodeURIComponent('Queue entry not found.'));
         }
 
         const queueEntry = queueRows[0];
 
         // Makes sure the queue entry is waiting
         if (queueEntry.status !== 'waiting') {
-            return res.status(400).send('This queue entry is not waiting.');
+            return res.redirect('/queue?error=' + encodeURIComponent('This queue entry is not waiting.'));
         }
 
         // Checks if this barber is already serving someone
@@ -192,7 +192,7 @@ router.post('/serve/:id', async (req, res) => {
         );
 
         if(servingRows.length > 0) {
-            return res.status(400).send('This barber is already serving another customer.');
+            return res.redirect('/queue?error=' + encodeURIComponent('This barber is already serving another customer.'));
         }
 
         // Change the queue entry to serving
@@ -226,13 +226,13 @@ router.post('/done/:id', async (req, res) => {
         );
 
         if (queueRows.length === 0) {
-            return res.status(400).send('Queue entry not found.');
+            return res.redirect('/queue?error=' + encodeURIComponent('Queue entry not found.'));
         }
 
         const queueEntry = queueRows[0];
 
         if (queueEntry.status !== 'serving') {
-            return res.status(400).send('This queue entry is not currently being served.');
+            return res.redirect('/queue?error=' + encodeURIComponent('This queue entry is not currently being served.'));
         }
 
         // Change the queue entry to done
@@ -275,7 +275,7 @@ router.post('/cancel/:id', async (req, res) => {
 
         // Checks if the queue entry exists
         if (queueRows.length === 0) {
-            return res.status(400).send('Queue entry not found.');
+            return res.redirect('/queue?error=' + encodeURIComponent('Queue entry not found.'));
         }
 
         const queueEntry = queueRows[0];
@@ -283,7 +283,7 @@ router.post('/cancel/:id', async (req, res) => {
         // Only waiting customers can be cancelled
         // Customers who are already serving or done cannot be cancelled
         if (queueEntry.status !== 'waiting') {
-            return res.status(400).send('Only waiting queue entries can be cancelled.');
+            return res.redirect('/queue?error=' + encodeURIComponent('Only waiting queue entries can be cancelled.'));
         }
 
         // Change the queue status to cancelled
