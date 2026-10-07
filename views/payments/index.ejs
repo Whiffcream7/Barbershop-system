@@ -1,60 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payments</title>
-</head>
-<body>
-    <a href="/dashboard">Back to Dashboard</a>
-    <h1>Payments</h1>
+<%- include('../partials/header') %>
 
-    <% if (success) { %>
-        <p>Payment recorded successfully.</p>
-    <% } %>
-    
-    <a href="/payments/add">Record Payment</a>
-    <br><br>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">PAYMENTS</p>
+      <h2>Payments</h2>
+      <p class="muted">View recorded payments and record a new one for an appointment.</p>
+    </div>
+    <a class="button primary" href="/payments/add">+ Record payment</a>
+  </div>
+
+  <% if (success) { %>
+    <div class="form-alert success" role="status">Payment recorded successfully.</div>
+  <% } %>
+
+  <article class="panel table-panel">
+    <div class="toolbar">
+      <div><strong>Payment records</strong><small><%= payments.length %> recorded</small></div>
+    </div>
 
     <% if (payments.length === 0) { %>
-        <p>No payments recorded yet.</p>
+      <p class="muted" style="padding:16px">No payments recorded yet.</p>
     <% } else { %>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Payment ID</th>
-                    <th>Appointment ID</th>
-                    <th>Custoemr</th>
-                    <th>Barber</th>
-                    <th>Amount</th>
-                    <th>Payment Method</th>
-                    <th>Received By</th>
-                    <th>Payment Date</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <% payments.forEach(payment => { %>
-                    <tr>
-                        <td><%= payment.payment_id %></td>
-                        <td><%= payment.appointment_id %></td>
-                        <td><%= payment.customer_name %></td>
-                        <td><%= payment.barber_name%></td>
-                        <td><%= Number(payment.amount).toFixed(2) %></td>
-                        <td><%= payment.payment_method %></td>
-                        <td><%= payment.received_by %></td>
-                        <td><%= new Date(payment.payment_date).toLocaleString('en-PH', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        }) %></td>
-                    </tr>
-                <% }) %>
-            </tbody>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Payment ID</th>
+              <th>Appointment ID</th>
+              <th>Customer</th>
+              <th>Barber</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Received by</th>
+              <th>Payment date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(payment => { %>
+              <tr>
+                <td><%= payment.payment_id %></td>
+                <td><%= payment.appointment_id %></td>
+                <td><strong><%= payment.customer_name %></strong></td>
+                <td><%= payment.barber_name %></td>
+                <td>₱<%= Number(payment.amount).toFixed(2) %></td>
+                <td><span class="status <%= payment.payment_method === 'gcash' ? 'blue' : 'green' %>"><%= payment.payment_method %></span></td>
+                <td><%= payment.received_by %></td>
+                <td><%= new Date(payment.payment_date).toLocaleString('en-PH', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                }) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
         </table>
+      </div>
     <% } %>
-</body>
-</html>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>

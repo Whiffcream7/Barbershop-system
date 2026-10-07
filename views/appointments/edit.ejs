@@ -1,88 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('../partials/header') %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Appointment</title>
-</head>
+<%
+  // Format the date using the local date parts. (toISOString() converts to UTC
+  // and shows the previous day in the Philippines.)
+  const apptDate = new Date(appointment.appointment_date);
+  const apptDateValue = apptDate.getFullYear() + '-' +
+    String(apptDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(apptDate.getDate()).padStart(2, '0');
+%>
 
-<body>
-    <h1>Edit Appointment</h1>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">APPOINTMENT MANAGEMENT</p>
+      <h2>Edit appointment</h2>
+    </div>
+    <a class="button secondary" href="/appointments">Back to appointments</a>
+  </div>
 
-    <a href="/appointments">Back to Appointments</a>
+  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
 
-    <% if (error) { %>
-        <p>
-            <%= error %>
-        </p>
-        <% } %>
+  <article class="panel form-panel">
+    <div class="panel-heading">
+      <div><p class="eyebrow">APPOINTMENT RECORD</p><h3>Edit appointment #<%= appointment.appointment_id %></h3></div>
+      <span class="required-note">* Required</span>
+    </div>
 
-            <form method="POST" action="/appointments/edit/<%= appointment.appointment_id %>">
+    <form method="POST" action="/appointments/edit/<%= appointment.appointment_id %>">
+      <div class="form-grid">
+        <label>Customer *
+          <select name="customer_id" id="customer_id" required>
+            <% customers.forEach(customer=> { %>
+              <option value="<%= customer.customer_id %>" <%= customer.customer_id==appointment.customer_id ? 'selected' : '' %>><%= customer.first_name %> <%= customer.last_name %></option>
+            <% }) %>
+          </select>
+        </label>
 
-                <label for="customer_id">Customer:</label>
-                <select name="customer_id" id="customer_id" required>
-                    <% customers.forEach(customer=> { %>
-                        <option value="<%= customer.customer_id %>" <%=customer.customer_id==appointment.customer_id ? 'selected' : '' %>>
-                            <%= customer.first_name %>
-                            <%= customer.last_name %>
-                        </option>
-                    <% }) %>
-                </select>
+        <label>Barber *
+          <select name="barber_id" id="barber_id" required>
+            <% barbers.forEach(barber=> { %>
+              <option value="<%= barber.barber_id %>" <%= barber.barber_id==appointment.barber_id ? 'selected' : '' %>><%= barber.first_name %> <%= barber.last_name %></option>
+            <% }) %>
+          </select>
+        </label>
 
-                <br><br>
+        <label>Date *
+          <input type="date" name="appointment_date" id="appointment_date" value="<%= apptDateValue %>" required>
+        </label>
 
-                <label for="barber_id">Barber:</label>
-                <select name="barber_id" id="barber_id" required>
-                    <% barbers.forEach(barber=> { %>
-                        <option value="<%= barber.barber_id %>" <%=barber.barber_id==appointment.barber_id ? 'selected' : '' %>>
-                            <%= barber.first_name%>
-                            <%= barber.last_name %>
-                        </option>
-                    <% }) %>
-                </select>
+        <label>Start time *
+          <input type="time" name="start_time" id="start_time" value="<%= appointment.start_time %>" required>
+        </label>
 
-                <br><br>
+        <label>End time (calculated)
+          <input type="text" id="end_time" readonly>
+        </label>
+      </div>
 
-                <label for="appointment_date">Date:</label>
-                <input type="date" name="appointment_date" id="appointment_date"
-                    value="<%= appointment.appointment_date.toISOString().split('T')[0] %>" required>
+      <fieldset style="border:0;padding:0;margin:20px 0 0">
+        <legend class="eyebrow" style="padding:0;margin-bottom:10px">SERVICES</legend>
+        <% services.forEach(service=> { %>
+          <label for="service_<%= service.service_id %>" style="display:flex;gap:10px;align-items:center;padding:6px 0;cursor:pointer">
+            <input type="checkbox" name="service_ids" value="<%= service.service_id %>" id="service_<%= service.service_id %>" data-duration="<%= service.duration_minutes %>" <%= selectedServiceIds.includes(service.service_id) ? 'checked' : '' %> style="width:18px;height:18px;padding:0;flex:0 0 auto">
+            <span><%= service.service_name %> - ₱<%= service.price %> (<%= service.duration_minutes %> mins)</span>
+          </label>
+        <% }) %>
+      </fieldset>
 
-                <br><br>
-
-                <label for="start_time">Start Time:</label>
-                <input type="time" name="start_time" id="start_time" value="<%= appointment.start_time %>" required>
-
-                <br><br>
-
-                <label for="end_time">End Time:</label>
-                <input type="text" id="end_time" readonly>
-
-                <br><br>
-
-                <label>Services:</label>
-
-                <% services.forEach(service=> { %>
-                    <div>
-                        <input
-                            type="checkbox"
-                            name="service_ids"
-                            value="<%= service.service_id %>"
-                            id="service_<%= service.service_id %>"
-                            data-duration="<%= service.duration_minutes %>"
-                            <%= selectedServiceIds.includes(service.service_id) ? 'checked' : '' %>
-                        >
-
-                        <label for="service_<%= service.service_id %>">
-                            <%= service.service_name %> - ₱<%= service.price %> (<%= service.duration_minutes %> mins)
-                        </label>
-                    </div>
-                <% }) %>
-
-                    <br>
-                    <button type="submit">Save Changes</button>
-            </form>
-</body>
+      <div class="form-actions">
+        <a class="button secondary" href="/appointments">Cancel</a>
+        <button class="button primary" type="submit">Save changes</button>
+      </div>
+    </form>
+  </article>
+</section>
 
 <script>
     // Get the start time and end time fields
@@ -124,8 +115,8 @@
 
         // Display the calculated time
         endTimeInput.value = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutes).padStart(2, '0')}`;
-    }    
-    
+    }
+
     // Recalculate when the start time changes
     startTimeInput.addEventListener('change', calculateEndTime);
 
@@ -138,4 +129,4 @@
     calculateEndTime();
 </script>
 
-</html>
+<%- include('../partials/footer') %>

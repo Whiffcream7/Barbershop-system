@@ -1,80 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
-</head>
-<body>
-    <a href="/dashboard">Back to Dashboard</a>
-    <h1>Reports</h1>
+<%- include('../partials/header') %>
 
-    <form method="get" action="/reports">
-        <label for="date">Select Date:</label>
+<section class="page-section active-section">
+  <div class="page-heading compact">
+    <div>
+      <p class="eyebrow">REPORTS</p>
+      <h2>Daily report</h2>
+      <p class="muted">Choose a date to see appointments, sales, barber activity and popular services.</p>
+    </div>
+    <a class="button secondary" href="/dashboard">Back to dashboard</a>
+  </div>
+
+  <article class="panel table-panel">
+    <div class="toolbar">
+      <div><strong>Report date</strong></div>
+      <form class="search-box" method="get" action="/reports">
         <input type="date" name="date" id="date" value="<%= selectedDate %>" required>
-        <button type="submit">View Report</button>
-    </form>
-    
-    <br>
+        <button class="button primary" type="submit">View report</button>
+      </form>
+    </div>
+  </article>
 
-    <h2>Report Summary</h2>
-    <p>
-        Total Appointments: <%= totalAppointments %>
-    </p>
+  <article class="panel" style="margin-top:14px">
+    <div class="panel-heading">
+      <div><p class="eyebrow">SUMMARY</p><h3>Report summary</h3></div>
+    </div>
+    <div style="padding:0 22px 22px">
+      <p>Total appointments: <strong><%= totalAppointments %></strong></p>
+      <p>Total sales: <strong>₱<%= Number(totalSales).toFixed(2) %></strong></p>
+    </div>
+  </article>
 
-    <p>
-        Total Sales: ₱<%= Number(totalSales).toFixed(2) %>
-    </p>
-
-    <h2>Appointments per Barber</h2>
-
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Barber</th>
-                <th>Appointments</th>
-            </tr>
-        </thead>
+  <article class="panel table-panel" style="margin-top:14px">
+    <div class="toolbar"><div><strong>Appointments per barber</strong></div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Barber</th><th>Appointments</th></tr></thead>
         <tbody>
-            <% if(barberAppointments.length === 0) { %>
-                <tr>
-                    <td colspan="2">No appoitnments found for this date.</td>
-                </tr>
-            <% } else { %>
-                <% barberAppointments.forEach(barber => { %>
-                    <tr>
-                        <td><%= barber.barber_name %></td>
-                        <td><%= barber.appointment_count %></td>
-                    </tr>
-                <% }) %>
-            <% } %>
+          <% if (barberAppointments.length === 0) { %>
+            <tr><td colspan="2">No appointments found for this date.</td></tr>
+          <% } else { %>
+            <% barberAppointments.forEach(barber => { %>
+              <tr>
+                <td><strong><%= barber.barber_name %></strong></td>
+                <td><%= barber.appointment_count %></td>
+              </tr>
+            <% }) %>
+          <% } %>
         </tbody>
-    </table>
+      </table>
+    </div>
+  </article>
 
-    <h2>Popular Services</h2>
-
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Services</th>
-                <th>Times Selected</th>
-            </tr>
-        </thead>
-
+  <article class="panel table-panel" style="margin-top:14px">
+    <div class="toolbar"><div><strong>Popular services</strong></div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Service</th><th>Times selected</th></tr></thead>
         <tbody>
-            <% if(popularServices.length === 0) { %>
-                <tr>
-                    <td colspan="2">No services found for this date.</td>
-                </tr>
-            <% } else { %>
-                <% popularServices.forEach(service => { %>
-                    <tr>
-                        <td><%= service.service_name %></td>
-                        <td><%= service.times_selected %></td>
-                    </tr>
-                <% }) %>
-            <% } %>
+          <% if (popularServices.length === 0) { %>
+            <tr><td colspan="2">No services found for this date.</td></tr>
+          <% } else { %>
+            <% popularServices.forEach(service => { %>
+              <tr>
+                <td><strong><%= service.service_name %></strong></td>
+                <td><%= service.times_selected %></td>
+              </tr>
+            <% }) %>
+          <% } %>
         </tbody>
-    </table>
-</body>
-</html>
+      </table>
+    </div>
+  </article>
+</section>
+
+<%- include('../partials/footer') %>
