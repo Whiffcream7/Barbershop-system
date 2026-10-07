@@ -9,6 +9,8 @@
         <a class="button secondary" href="/appointments">Back to list</a>
     </div>
 
+    <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+
     <article class="panel form-panel">
         <div class="panel-heading">
             <div><p class="eyebrow">APPOINTMENT RECORD</p></div>
@@ -67,17 +69,15 @@
                 </label>
 
                 <!-- Services -->
-                <label>Services:
+                <fieldset style="border:0;padding:0;margin:20px 0 0">
+                    <legend class="eyebrow">SERVICES</legend>
                     <% services.forEach(service=> { %>
-                        <div class="check-grid check">
-                            <input type="checkbox" name="service_ids" value="<%= service.service_id %>" id="service_<%= service.service_id %>" data-duration="<%= service.duration_minutes %>">
-                            <label for="service_<%= service.service_id %>">
+                            <label for="service_<%= service.service_id %>" style="display:flex;gap:10px;align-items:center;padding:6px 0;cursor:pointer">
+                                <input type="checkbox" name="service_ids" value="<%= service.service_id %>" id="service_<%= service.service_id %>" data-duration="<%= service.duration_minutes %>" style="width:18px;height:18px;padding:0;flex:0 0 auto">
                                 <%= service.service_name %> - ₱<%= service.price %> (<%= service.duration_minutes %> mins)
                             </label>
-                        </div>
                     <% }) %>
-                </label>
-
+                </fieldset>
                     
             </div>
             <div class="form-actions">
@@ -88,8 +88,6 @@
     </article>
 
 </section>
-
-<%- include('../partials/footer') %>
 
 <script>
     // Get the start time and end time fields
@@ -196,4 +194,4 @@
     updateBookingType();
 </script>
 
-</html>
+<%- include('../partials/footer') %>
