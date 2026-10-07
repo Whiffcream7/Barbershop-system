@@ -1,133 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('../partials/header') %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue</title>
-</head>
+<section class="page-section active-section">
+    <div class="page-heading compact">
+        <div>
+            <p class="eyebrow">QUEUE MANAGEMENT</p>   
+            <h2>Queue</h2>
+            <p class="muted"></p>
+        </div>
+    </div>
 
-<body>
-    <a href="/dashboard">Back to Dashboard</a>
-
-    <h1>Today's Queue</h1>
-
+    <h3>Today's Queue</h3>
     <% if (error) { %>
         <p><%= error %></p>
     <% } %>
+    <article class="panel table-panel">
+        <div class="toolbar">
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Queue #</th>
-                <th>Customer</th>
-                <th>Barber</th>
-                <th>Services</th>
-                <th>Status</th>
-                <th>Time In</th>
-                <th>Time Started</th>
-                <th>Time Done</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <% if (queue.length === 0) { %>
-                <tr>
-                    <td colspan="9">No customers in the queue today.</td>
-                </tr>
-            <% } else { %>
-                
-                <% queue.forEach(entry => { %>
+        </div>
+        
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td><%= entry.queue_number %></td>
-                        <td><%= entry.customer_name %></td>
-                        <td><%= entry.barber_name %></td>
-                        <td><%= entry.services %></td>
-                        <td><%= entry.status %></td>
-                        <td>
-                            <%= new Date(entry.time_in).toLocaleString('en-PH', {
-                                hour: 'numeric',
-                                minute: '2-digit'
-                            }) %>
-                        </td>
-                        <td>
-                            <%= entry.time_started ? new Date(entry.time_started).toLocaleString('en-PH', {
-                                hour: 'numeric',
-                                minute: '2-digit'
-                            }) : '-' %>
-                        </td>
-                        <td>
-                            <%= entry.time_done ? new Date(entry.time_done).toLocaleString('en-PH', {
-                                hour: 'numeric',
-                                minute: '2-digit'
-                            }) : '-' %>
-                        </td>
-                        <td>
-                            <% if (entry.status === 'waiting') { %>
-                                <form method="post" action="/queue/serve/<%= entry.queue_id %>">
-                                    <button type="submit">Serve</button>
-                                </form>
-                                <form method="post" action="/queue/cancel/<%= entry.queue_id %>">
-                                    <button type="submit">Cancel</button>
-                                </form>
-                            <% } else if (entry.status === 'serving') { %>
-                                <form method="post" action="/queue/done/<%= entry.queue_id %>">
-                                    <button type="submit">Done</button>
-                                </form>
-                            <% } else { %>
-                                No actions
-                            <% } %>
-                        </td>
+                        <th>Queue #</th>
+                        <th>Customer</th>
+                        <th>Barber</th>
+                        <th>Services</th>
+                        <th>Status</th>
+                        <th>Time In</th>
+                        <th>Time Started</th>
+                        <th>Time Done</th>
+                        <th>Action</th>
                     </tr>
-                <% }) %>
+                </thead>
 
-            <% } %>   
-        </tbody>
-    </table>
+                <tbody>
+                    <% if (queue.length === 0) { %>
+                        <tr>
+                            <td colspan="9">No customers in the queue today.</td>
+                        </tr>
+                    <% } else { %>
+                        
+                        <% queue.forEach(entry => { %>
+                            <tr>
+                                <td><%= entry.queue_number %></td>
+                                <td><%= entry.customer_name %></td>
+                                <td><%= entry.barber_name %></td>
+                                <td><%= entry.services %></td>
+                                <td><%= entry.status %></td>
+                                <td>
+                                    <%= new Date(entry.time_in).toLocaleString('en-PH', {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) %>
+                                </td>
+                                <td>
+                                    <%= entry.time_started ? new Date(entry.time_started).toLocaleString('en-PH', {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) : '-' %>
+                                </td>
+                                <td>
+                                    <%= entry.time_done ? new Date(entry.time_done).toLocaleString('en-PH', {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) : '-' %>
+                                </td>
+                                <td>
+                                    <% if (entry.status === 'waiting') { %>
+                                        <form method="post" action="/queue/serve/<%= entry.queue_id %>">
+                                            <button class="button" type="submit">Serve</button>
+                                        </form>
+                                        <form method="post" action="/queue/cancel/<%= entry.queue_id %>">
+                                            <button class="button" type="submit">Cancel</button>
+                                        </form>
+                                    <% } else if (entry.status === 'serving') { %>
+                                        <form method="post" action="/queue/done/<%= entry.queue_id %>">
+                                            <button class="button" type="submit">Done</button>
+                                        </form>
+                                    <% } else { %>
+                                        No actions
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+
+                    <% } %>   
+                </tbody>
+            </table>
+        </div>
+    </article>
 
     <h2>Today's Appointments</h2>
-
-    <% if (appointments.length === 0) { %>
-        <p>No appointments are waiting to be added to the queue.</p>
-    <% }  else { %>
-
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Customer</th>
-                    <th>Barber</th>
-                    <th>Services</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% appointments.forEach(appointment => { %>
-                    <tr>
-                        <td><%= appointment.customer_name %></td>
-                        <td><%= appointment.barber_name %></td>
-                        <td><%= appointment.services %></td>
-                        <td><%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
-                            hour: 'numeric',
-                            minute: '2-digit'
-                        }) %></td>
-                        <td><%= new Date(`1970-01-01T${appointment.end_time}`).toLocaleTimeString('en-PH', {
-                            hour: 'numeric',
-                            minute: '2-digit'
-                        }) %></td>
-                        <td>
-                            <form method="post" action="/queue/add/<%= appointment.appointment_id %>">
-                                <button type="submit">Add to Queue</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-
-    <% } %>
-</body>
-
-</html>
+    <% if (error) { %>
+        <p><%= error %></p>
+    <% } %>    
+    <article class="table-panel">
+        <div class="toolbar"></div>
+        <div class="table-wrap">
+            <% if (appointments.length === 0) { %>
+                <p>No appointments are waiting to be added to the queue.</p>
+            <% }  else { %>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Barber</th>
+                                <th>Services</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% appointments.forEach(appointment => { %>
+                                <tr>
+                                    <td><%= appointment.customer_name %></td>
+                                    <td><%= appointment.barber_name %></td>
+                                    <td><%= appointment.services %></td>
+                                    <td><%= new Date(`1970-01-01T${appointment.start_time}`).toLocaleTimeString('en-PH', {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) %></td>
+                                    <td><%= new Date(`1970-01-01T${appointment.end_time}`).toLocaleTimeString('en-PH', {
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) %></td>
+                                    <td>
+                                        <form method="post" action="/queue/add/<%= appointment.appointment_id %>">
+                                            <button class="button" type="submit">Add to Queue</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </article>
+</section>
