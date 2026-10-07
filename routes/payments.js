@@ -7,6 +7,23 @@ const pool = require('../config/db');
 //GET /payments
 router.get('/', async (req, res) => {
     try {
+        const search = req.query.search || '';
+        const sort = req.query.sort || 'payment_date';
+        const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
+
+        const sortColumns = {
+            payment_id: 'p.payment_id',
+            appointment_id: 'p.appointment_id',
+            customer: 'customer_name',
+            barber: 'barber_name',
+            amount: 'p.amount',
+            method: 'p.payment_method',
+            received_by: 'received_by',
+            payment_date: 'p.payment_date'
+        };
+
+        const sortColumn = sortColumns[sort] || 'p.payment_date';
+
         // Get all recorded payments
         const [payments] = await pool.execute(
             `SELECT
@@ -27,12 +44,22 @@ router.get('/', async (req, res) => {
                 ON a.barber_id = b.barber_id
             JOIN users u
                 ON p.received_by = u.user_id
-            ORDER BY p.payment_date DESC`
+            WHERE
+                CONCAT(c.first_name, ' ', c.last_name) LIKE ?
+                OR CONCAT(b.first_name, ' ', b.last_name) LIKE ?
+                OR u.full_name LIKE ?
+            ORDER BY ${sortColumn} ${order}`,
+            [`%${search}%`, `%${search}%`, `%${search}%`]
         );
+        
+        
 
         res.render('payments/index', {
             payments,
-            success: req.query.success === '1'
+            success: req.query.success === '1',
+            search,
+            sort,
+            order
         });
         
     } catch (err) {

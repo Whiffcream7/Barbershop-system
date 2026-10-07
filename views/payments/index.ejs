@@ -1,5 +1,5 @@
 <%- include('../partials/header') %>
-
+  
 <section class="page-section active-section">
   <div class="page-heading compact">
     <div>
@@ -17,6 +17,10 @@
   <article class="panel table-panel">
     <div class="toolbar">
       <div><strong>Payment records</strong><small><%= payments.length %> recorded</small></div>
+      <form class="search-box" method="get" action="/payments">
+        <input type="search" name="search" placeholder="Search customer, barber, or receiver..." value="<%= search %>">
+        <button class="button secondary" type="submit">Search</button>
+    </form>
     </div>
 
     <% if (payments.length === 0) { %>
@@ -26,14 +30,14 @@
         <table>
           <thead>
             <tr>
-              <th>Payment ID</th>
-              <th>Appointment ID</th>
-              <th>Customer</th>
-              <th>Barber</th>
-              <th>Amount</th>
+              <th>Payment ID <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('payment_id')">⇵</a></th>
+              <th>Appointment ID <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('appointment_id')">⇵</a></th>
+              <th>Customer <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('customer')">⇵</a></th>
+              <th>Barber <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('barber')">⇵</a></th>
+              <th>Amount <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('amount')">⇵</a></th>
               <th>Method</th>
-              <th>Received by</th>
-              <th>Payment date</th>
+              <th>Received by <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('received_by')">⇵</a></th>
+              <th>Payment date <a style="cursor: pointer; font-size: medium;" onclick="sortAppointments('payment_date')">⇵</a></th>
             </tr>
           </thead>
           <tbody>
@@ -64,3 +68,26 @@
 </section>
 
 <%- include('../partials/footer') %>
+
+<script>
+  function sortAppointments(sortBy) {
+      // Get the current URL
+      const url = new URL(window.location.href);
+
+      // Get the current sorting settings
+      const currentSort = url.searchParams.get('sort');
+      const currentOrder = url.searchParams.get('order');
+
+      // If clicking the same column, reverse the order
+      if (currentSort === sortBy && currentOrder === 'asc') {
+          url.searchParams.set('order', 'desc');
+      } else {
+          // Otherwise, start with ascending
+          url.searchParams.set('sort', sortBy);
+          url.searchParams.set('order', 'asc');
+      }
+      
+      // Reload the page with the new sorting
+      window.location.href = url.toString();
+  }
+</script>
