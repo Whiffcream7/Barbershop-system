@@ -3,10 +3,10 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const pool = require('../config/db');
 
-const SALT_ROUNDS = 10;   // gaano kahirap i-crack ang hash
+const SALT_ROUNDS = 10;   // how hard the hash is to crack
 
 // LIST + SEARCH: GET /users?search=staff
-// HINDI isinasama ang password_hash sa SELECT, para hindi ito lumabas sa page
+// password_hash is not in the SELECT so it never shows on the page
 router.get('/', async (req, res) => {
   try {
     const search = req.query.search || '';
@@ -42,7 +42,7 @@ router.post('/add', async (req, res) => {
   }
 
   try {
-    // Hini-hash ang password bago i-save. Hindi kailanman nase-save ang plain password
+    // hash the password before saving, the plain password is never saved
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     await pool.execute(
       'INSERT INTO users (username, password_hash, full_name, role) VALUES (?, ?, ?, ?)',
@@ -50,7 +50,7 @@ router.post('/add', async (req, res) => {
     );
     res.redirect('/users');
   } catch (err) {
-    // UNIQUE ang username sa database
+    // username is UNIQUE in the database
     if (err.code === 'ER_DUP_ENTRY') {
       return res.render('users/form', {
         user: req.body, error: 'That username is already taken.', action: '/users/add'
@@ -76,7 +76,7 @@ router.get('/edit/:id', async (req, res) => {
   }
 });
 
-// EDIT SAVE (kapag blangko ang password, hindi ito babaguhin)
+// EDIT SAVE (if the password is blank, it is not changed)
 router.post('/edit/:id', async (req, res) => {
   const { username, full_name, password, role } = req.body;
   const editingSelf = Number(req.params.id) === req.session.user.user_id;
@@ -88,7 +88,7 @@ router.post('/edit/:id', async (req, res) => {
       action: `/users/edit/${req.params.id}`
     });
   }
-  // Para hindi ma-lock out ang admin sa sarili niyang account
+  // so the admin can't lock themselves out
   if (editingSelf && role !== 'admin') {
     return res.render('users/form', {
       user: formData, error: 'You cannot remove your own admin role.',
@@ -127,7 +127,7 @@ router.post('/edit/:id', async (req, res) => {
 
 // DELETE
 router.post('/delete/:id', async (req, res) => {
-  // Hindi pwedeng burahin ang sarili mong account habang naka-login
+  // you can't delete your own account while logged in
   if (Number(req.params.id) === req.session.user.user_id) {
     const [rows] = await pool.execute(
       'SELECT user_id, username, full_name, role, created_at FROM users ORDER BY username'
@@ -141,7 +141,7 @@ router.post('/delete/:id', async (req, res) => {
     await pool.execute('DELETE FROM users WHERE user_id = ?', [req.params.id]);
     res.redirect('/users');
   } catch (err) {
-    // Business rule #8: may appointments o payments na ang user, friendly error lang
+    // Business rule #8: the user already has appointments or payments, so show a friendly error
     if (err.code === 'ER_ROW_IS_REFERENCED_2') {
       const [rows] = await pool.execute(
         'SELECT user_id, username, full_name, role, created_at FROM users ORDER BY username'

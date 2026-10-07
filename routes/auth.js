@@ -23,20 +23,20 @@ router.post('/login', async (req, res) => {
       [username.trim()]
     );
 
-    // Iisang generic message para hindi malaman kung username o password ang mali
+    // one generic message so nobody can tell if the username or password was wrong
     if (rows.length === 0) {
       return res.render('login', { error: 'Invalid username or password.' });
     }
 
     const user = rows[0];
 
-    // Ikinukumpara ng bcrypt ang tinype na password sa hash sa database
+    // bcrypt compares the typed password with the hash in the database
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.render('login', { error: 'Invalid username or password.' });
     }
 
-    // I-save sa session ang kailangan lang (HUWAG ang password_hash)
+    // only save what we need in the session (NOT the password_hash)
     req.session.user = {
       user_id: user.user_id,
       username: user.username,
