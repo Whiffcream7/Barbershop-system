@@ -5,40 +5,113 @@
     <div>
       <p class="eyebrow">SERVICE MANAGEMENT</p>
       <h2>Services</h2>
-      <p class="muted">Manage services, prices and durations. Inactive services cannot be booked.</p>
+      <p class="muted">Add, view, update, delete, and manage service records.</p>
     </div>
     <a class="button primary" href="/services/add">+ Add service</a>
   </div>
 
-  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+  <% if (error) { %>
+    <div class="form-alert danger" role="alert"><%= error %></div>
+  <% } %>
 
   <article class="panel table-panel">
     <div class="toolbar">
-      <div><strong>Service records</strong><small><%= services.length %> shown</small></div>
+      <div>
+        <strong>Service records</strong>
+        <small><%= services.length %> shown</small>
+      </div>
+
       <form class="search-box" method="GET" action="/services">
-        <input type="search" name="search" value="<%= search %>" placeholder="Search service">
+        <input
+          type="search"
+          name="search"
+          value="<%= search %>"
+          placeholder="Search service or description"
+        >
         <button class="button secondary" type="submit">Search</button>
       </form>
     </div>
+
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Service</th><th>Description</th><th>Price</th><th>Minutes</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>
+              ID
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortServices('id')">⇅</a>
+            </th>
+
+            <th>
+              Service
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortServices('name')">⇅</a>
+            </th>
+
+            <th>
+              Price
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortServices('price')">⇅</a>
+            </th>
+
+            <th>
+              Duration
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortServices('duration')">⇅</a>
+            </th>
+
+            <th>
+              Status
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortServices('status')">⇅</a>
+            </th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+
         <tbody>
-          <% if (services.length === 0) { %><tr><td colspan="7">No services found.</td></tr><% } %>
+          <% if (services.length === 0) { %>
+            <tr>
+              <td colspan="6">No services found.</td>
+            </tr>
+          <% } %>
+
           <% services.forEach(s => { %>
             <tr>
               <td><%= s.service_id %></td>
-              <td><strong><%= s.service_name %></strong></td>
-              <td><%= s.description || '—' %></td>
-              <td>₱<%= s.price %></td>
-              <td><%= s.duration_minutes %></td>
-              <td><span class="status <%= s.is_active ? 'green' : 'gray' %>"><%= s.is_active ? 'Active' : 'Inactive' %></span></td>
+
+              <td>
+                <strong><%= s.service_name %></strong>
+              </td>
+
+              <td>₱<%= Number(s.price).toFixed(2) %></td>
+
+              <td><%= s.duration_minutes %> min</td>
+
+              <td>
+                <span class="status <%= s.is_active ? 'green' : 'red' %>">
+                  <%= s.is_active ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+
               <td>
                 <div class="action-links">
                   <a href="/services/edit/<%= s.service_id %>">Edit</a>
-                  <form method="POST" action="/services/delete/<%= s.service_id %>" style="display:inline"
-                        onsubmit="return confirm('Delete this service?')">
-                    <button type="submit" class="danger-text" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+
+                  <form
+                    method="POST"
+                    action="/services/delete/<%= s.service_id %>"
+                    style="display:inline"
+                    onsubmit="return confirm('Delete this service?')"
+                  >
+                    <button
+                      type="submit"
+                      class="danger-text"
+                      style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800"
+                    >
+                      Delete
+                    </button>
                   </form>
                 </div>
               </td>
@@ -51,3 +124,21 @@
 </section>
 
 <%- include('../partials/footer') %>
+
+<script>
+  function sortServices(sortBy) {
+    const url = new URL(window.location.href);
+
+    const currentSort = url.searchParams.get('sort');
+    const currentOrder = url.searchParams.get('order');
+
+    if (currentSort === sortBy && currentOrder === 'asc') {
+      url.searchParams.set('order', 'desc');
+    } else {
+      url.searchParams.set('sort', sortBy);
+      url.searchParams.set('order', 'asc');
+    }
+
+    window.location.href = url.toString();
+  }
+</script>

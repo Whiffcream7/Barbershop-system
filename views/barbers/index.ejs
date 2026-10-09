@@ -5,39 +5,113 @@
     <div>
       <p class="eyebrow">BARBER MANAGEMENT</p>
       <h2>Barbers</h2>
-      <p class="muted">Add, view, update, and delete barbers. Inactive barbers cannot be booked.</p>
+      <p class="muted">Add, view, update, delete, and manage barber records.</p>
     </div>
     <a class="button primary" href="/barbers/add">+ Add barber</a>
   </div>
 
-  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+  <% if (error) { %>
+    <div class="form-alert danger" role="alert"><%= error %></div>
+  <% } %>
 
   <article class="panel table-panel">
     <div class="toolbar">
-      <div><strong>Barber records</strong><small><%= barbers.length %> shown</small></div>
+      <div>
+        <strong>Barber records</strong>
+        <small><%= barbers.length %> shown</small>
+      </div>
+
       <form class="search-box" method="GET" action="/barbers">
-        <input type="search" name="search" value="<%= search %>" placeholder="Search name or specialty">
+        <input
+          type="search"
+          name="search"
+          value="<%= search %>"
+          placeholder="Search name or specialty"
+        >
         <button class="button secondary" type="submit">Search</button>
       </form>
     </div>
+
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Name</th><th>Specialty</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>
+              ID
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortBarbers('id')">⇅</a>
+            </th>
+
+            <th>
+              Barber
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortBarbers('name')">⇅</a>
+            </th>
+
+            <th>
+              Specialty
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortBarbers('specialty')">⇅</a>
+            </th>
+
+            <th>
+              Phone
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortBarbers('phone')">⇅</a>
+            </th>
+
+            <th>
+              Status
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortBarbers('status')">⇅</a>
+            </th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+
         <tbody>
-          <% if (barbers.length === 0) { %><tr><td colspan="6">No barbers found.</td></tr><% } %>
+          <% if (barbers.length === 0) { %>
+            <tr>
+              <td colspan="6">No barbers found.</td>
+            </tr>
+          <% } %>
+
           <% barbers.forEach(b => { %>
             <tr>
               <td><%= b.barber_id %></td>
-              <td><strong><%= b.first_name %> <%= b.last_name %></strong></td>
+
+              <td>
+                <strong><%= b.first_name %> <%= b.last_name %></strong>
+              </td>
+
               <td><%= b.specialty || '—' %></td>
+
               <td><%= b.phone || '—' %></td>
-              <td><span class="status <%= b.status === 'active' ? 'green' : 'gray' %>"><%= b.status %></span></td>
+
+              <td>
+                <span class="status <%= b.status === 'active' ? 'green' : 'red' %>">
+                  <%= b.status %>
+                </span>
+              </td>
+
               <td>
                 <div class="action-links">
                   <a href="/barbers/edit/<%= b.barber_id %>">Edit</a>
-                  <form method="POST" action="/barbers/delete/<%= b.barber_id %>" style="display:inline"
-                        onsubmit="return confirm('Delete this barber?')">
-                    <button type="submit" class="danger-text" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+
+                  <form
+                    method="POST"
+                    action="/barbers/delete/<%= b.barber_id %>"
+                    style="display:inline"
+                    onsubmit="return confirm('Delete this barber?')"
+                  >
+                    <button
+                      type="submit"
+                      class="danger-text"
+                      style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800"
+                    >
+                      Delete
+                    </button>
                   </form>
                 </div>
               </td>
@@ -50,3 +124,21 @@
 </section>
 
 <%- include('../partials/footer') %>
+
+<script>
+  function sortBarbers(sortBy) {
+    const url = new URL(window.location.href);
+
+    const currentSort = url.searchParams.get('sort');
+    const currentOrder = url.searchParams.get('order');
+
+    if (currentSort === sortBy && currentOrder === 'asc') {
+      url.searchParams.set('order', 'desc');
+    } else {
+      url.searchParams.set('sort', sortBy);
+      url.searchParams.set('order', 'asc');
+    }
+
+    window.location.href = url.toString();
+  }
+</script>

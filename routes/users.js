@@ -1,3 +1,4 @@
+const { getOrder } = require('../utils/sort');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
@@ -10,13 +11,21 @@ const SALT_ROUNDS = 10;   // how hard the hash is to crack
 router.get('/', async (req, res) => {
   try {
     const search = req.query.search || '';
+    const o = getOrder(req.query, {
+        id: 'user_id',
+        username: 'username',
+        name: 'full_name',
+        role: 'role',
+        created: 'created_at'
+      }, 'name');
+    // HINDI isinasama ang password_hash sa SELECT
     const [rows] = await pool.execute(
       `SELECT user_id, username, full_name, role, created_at FROM users
        WHERE username LIKE ? OR full_name LIKE ?
-       ORDER BY username`,
+       ORDER BY ${o.sql}`,
       [`%${search}%`, `%${search}%`]
     );
-    res.render('users/index', { users: rows, search, error: null });
+    res.render('users/index', { users: rows, search, error: null, order: o.key });
   } catch (err) {
     console.error(err);
     res.status(500).send('Something went wrong.');

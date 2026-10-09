@@ -10,13 +10,24 @@
     <a class="button primary" href="/customers/add">+ Add customer</a>
   </div>
 
-  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+  <% if (error) { %>
+    <div class="form-alert danger" role="alert"><%= error %></div>
+  <% } %>
 
   <article class="panel table-panel">
     <div class="toolbar">
-      <div><strong>Customer records</strong><small><%= customers.length %> shown</small></div>
+      <div>
+        <strong>Customer records</strong>
+        <small><%= customers.length %> shown</small>
+      </div>
+
       <form class="search-box" method="GET" action="/customers">
-        <input type="search" name="search" value="<%= search %>" placeholder="Search name or phone">
+        <input
+          type="search"
+          name="search"
+          value="<%= search %>"
+          placeholder="Search name or phone"
+        >
         <button class="button secondary" type="submit">Search</button>
       </form>
     </div>
@@ -24,25 +35,71 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>ID</th><th>Customer</th><th>Phone</th><th>Email</th><th>Actions</th></tr>
+          <tr>
+            <th>
+              ID
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortCustomers('id')">⇅</a>
+            </th>
+
+            <th>
+              Customer
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortCustomers('name')">⇅</a>
+            </th>
+
+            <th>
+              Phone
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortCustomers('phone')">⇅</a>
+            </th>
+
+            <th>
+              Email
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortCustomers('email')">⇅</a>
+            </th>
+
+            <th>Actions</th>
+          </tr>
         </thead>
+
         <tbody>
           <% if (customers.length === 0) { %>
-            <tr><td colspan="5">No customers found.</td></tr>
+            <tr>
+              <td colspan="5">No customers found.</td>
+            </tr>
           <% } %>
+
           <% customers.forEach(c => { %>
             <tr>
               <td><%= c.customer_id %></td>
-              <td><strong><%= c.first_name %> <%= c.last_name %></strong></td>
+
+              <td>
+                <strong><%= c.first_name %> <%= c.last_name %></strong>
+              </td>
+
               <td><%= c.phone %></td>
+
               <td><%= c.email || '—' %></td>
+
               <td>
                 <div class="action-links">
                   <a href="/customers/edit/<%= c.customer_id %>">Edit</a>
-                  <form method="POST" action="/customers/delete/<%= c.customer_id %>" style="display:inline"
-                        onsubmit="return confirm('Delete this customer?')">
-                    <button type="submit" class="danger-text"
-                            style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+
+                  <form
+                    method="POST"
+                    action="/customers/delete/<%= c.customer_id %>"
+                    style="display:inline"
+                    onsubmit="return confirm('Delete this customer?')"
+                  >
+                    <button
+                      type="submit"
+                      class="danger-text"
+                      style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800"
+                    >
+                      Delete
+                    </button>
                   </form>
                 </div>
               </td>
@@ -55,3 +112,21 @@
 </section>
 
 <%- include('../partials/footer') %>
+
+<script>
+  function sortCustomers(sortBy) {
+    const url = new URL(window.location.href);
+
+    const currentSort = url.searchParams.get('sort');
+    const currentOrder = url.searchParams.get('order');
+
+    if (currentSort === sortBy && currentOrder === 'asc') {
+      url.searchParams.set('order', 'desc');
+    } else {
+      url.searchParams.set('sort', sortBy);
+      url.searchParams.set('order', 'asc');
+    }
+
+    window.location.href = url.toString();
+  }
+</script>

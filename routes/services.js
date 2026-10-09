@@ -1,8 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const { getOrder } = require('../utils/sort');
 
-// checks the form input, returns an error message or null if it's okay
+const ORDER_OPTIONS = {
+  id: 'service_id',
+  name: 'service_name',
+  price: 'price',
+  duration: 'duration_minutes',
+  status: 'is_active'
+};
+
+// Sinusuri ang input ng form. Ibinabalik ang error message, o null kung okay
 function validateService(body) {
   const { service_name, price, duration_minutes } = body;
   if (!service_name.trim()) return 'Service name is required.';
@@ -13,17 +22,27 @@ function validateService(body) {
   return null;
 }
 
-// LIST + SEARCH: GET /services?search=fade
+// Duplicate kung pareho ang service name
+async function isDuplicate(name, excludeId) {
+  const [rows] = await pool.execute(
+    'SELECT service_id FROM services WHERE service_name = ? AND service_id <> ?',
+    [name, excludeId || 0]
+  );
+  return rows.length > 0;
+}
+
+// LIST + SEARCH + SORT
 router.get('/', async (req, res) => {
   try {
     const search = req.query.search || '';
+    const o = getOrder(req.query, ORDER_OPTIONS, 'name');
     const [rows] = await pool.execute(
       `SELECT * FROM services
        WHERE service_name LIKE ? OR description LIKE ?
-       ORDER BY service_name`,
+       ORDER BY ${o.sql}`,
       [`%${search}%`, `%${search}%`]
     );
-    res.render('services/index', { services: rows, search, error: null });
+    res.render('services/index', { services: rows, search, error: null, order: o.key });
   } catch (err) {
     console.error(err);
     res.status(500).send('Something went wrong.');
@@ -44,6 +63,11 @@ router.post('/add', async (req, res) => {
 
   const { service_name, description, price, duration_minutes, is_active } = req.body;
   try {
+    if (await isDuplicate(service_name.trim())) {
+      return res.render('services/form', {
+        service: req.body, error: 'This service already exists.', action: '/services/add'
+      });
+    }
     await pool.execute(
       'INSERT INTO services (service_name, description, price, duration_minutes, is_active) VALUES (?, ?, ?, ?, ?)',
       [service_name.trim(), description || null, price, duration_minutes, is_active === '1' ? 1 : 0]
@@ -73,16 +97,22 @@ router.get('/edit/:id', async (req, res) => {
 
 // EDIT SAVE
 router.post('/edit/:id', async (req, res) => {
+  const formData = { ...req.body, service_id: req.params.id };
   const error = validateService(req.body);
   if (error) {
     return res.render('services/form', {
-      service: { ...req.body, service_id: req.params.id },
-      error, action: `/services/edit/${req.params.id}`
+      service: formData, error, action: `/services/edit/${req.params.id}`
     });
   }
 
   const { service_name, description, price, duration_minutes, is_active } = req.body;
   try {
+    if (await isDuplicate(service_name.trim(), req.params.id)) {
+      return res.render('services/form', {
+        service: formData, error: 'This service already exists.',
+        action: `/services/edit/${req.params.id}`
+      });
+    }
     await pool.execute(
       `UPDATE services
        SET service_name = ?, description = ?, price = ?, duration_minutes = ?, is_active = ?
@@ -102,11 +132,11 @@ router.post('/delete/:id', async (req, res) => {
     await pool.execute('DELETE FROM services WHERE service_id = ?', [req.params.id]);
     res.redirect('/services');
   } catch (err) {
-    // Business rule #8: service is already used in appointments, so show a friendly error
+    // Business rule #8: nagamit na ang service sa appointments, friendly error lang
     if (err.code === 'ER_ROW_IS_REFERENCED_2') {
       const [rows] = await pool.execute('SELECT * FROM services ORDER BY service_name');
       return res.render('services/index', {
-        services: rows, search: '',
+        services: rows, search: '', order: 'az',
         error: 'Cannot delete: this service is used in appointments. Set it to inactive instead.'
       });
     }

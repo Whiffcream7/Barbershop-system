@@ -3,41 +3,121 @@
 <section class="page-section active-section">
   <div class="page-heading compact">
     <div>
-      <p class="eyebrow">USER ACCOUNTS</p>
-      <h2>User accounts</h2>
-      <p class="muted">Administrator only. Passwords are stored as bcrypt hashes.</p>
+      <p class="eyebrow">USER MANAGEMENT</p>
+      <h2>Users</h2>
+      <p class="muted">Add, view, update, and manage system users.</p>
     </div>
     <a class="button primary" href="/users/add">+ Add user</a>
   </div>
 
-  <% if (error) { %><div class="form-alert danger" role="alert"><%= error %></div><% } %>
+  <% if (error) { %>
+    <div class="form-alert danger" role="alert"><%= error %></div>
+  <% } %>
 
   <article class="panel table-panel">
     <div class="toolbar">
-      <div><strong>Accounts</strong><small><%= users.length %> shown</small></div>
+      <div>
+        <strong>User records</strong>
+        <small><%= users.length %> shown</small>
+      </div>
+
       <form class="search-box" method="GET" action="/users">
-        <input type="search" name="search" value="<%= search %>" placeholder="Search username or name">
+        <input
+          type="search"
+          name="search"
+          value="<%= search %>"
+          placeholder="Search username or name"
+        >
         <button class="button secondary" type="submit">Search</button>
       </form>
     </div>
+
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Username</th><th>Full name</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>
+              ID
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortUsers('id')">⇅</a>
+            </th>
+
+            <th>
+              Username
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortUsers('username')">⇅</a>
+            </th>
+
+            <th>
+              Full Name
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortUsers('name')">⇅</a>
+            </th>
+
+            <th>
+              Role
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortUsers('role')">⇅</a>
+            </th>
+
+            <th>
+              Created
+              <a style="cursor:pointer; font-size:medium;"
+                 onclick="sortUsers('created')">⇅</a>
+            </th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+
         <tbody>
-          <% if (users.length === 0) { %><tr><td colspan="6">No users found.</td></tr><% } %>
+          <% if (users.length === 0) { %>
+            <tr>
+              <td colspan="6">No users found.</td>
+            </tr>
+          <% } %>
+
           <% users.forEach(u => { %>
             <tr>
               <td><%= u.user_id %></td>
-              <td><strong><%= u.username %></strong></td>
+
+              <td>
+                <strong><%= u.username %></strong>
+              </td>
+
               <td><%= u.full_name %></td>
-              <td><span class="status <%= u.role === 'admin' ? 'blue' : 'gray' %>"><%= u.role %></span></td>
-              <td><%= new Date(u.created_at).toISOString().slice(0, 10) %></td>
+
+              <td>
+                <span class="status <%= u.role === 'admin' ? 'blue' : 'green' %>">
+                  <%= u.role %>
+                </span>
+              </td>
+
+              <td>
+                <%= new Date(u.created_at).toLocaleString('en-PH', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                }) %>
+              </td>
+
               <td>
                 <div class="action-links">
                   <a href="/users/edit/<%= u.user_id %>">Edit</a>
-                  <form method="POST" action="/users/delete/<%= u.user_id %>" style="display:inline"
-                        onsubmit="return confirm('Delete this user?')">
-                    <button type="submit" class="danger-text" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800">Delete</button>
+
+                  <form
+                    method="POST"
+                    action="/users/delete/<%= u.user_id %>"
+                    style="display:inline"
+                    onsubmit="return confirm('Delete this user?')"
+                  >
+                    <button
+                      type="submit"
+                      class="danger-text"
+                      style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:.73rem;font-weight:800"
+                    >
+                      Delete
+                    </button>
                   </form>
                 </div>
               </td>
@@ -50,3 +130,21 @@
 </section>
 
 <%- include('../partials/footer') %>
+
+<script>
+  function sortUsers(sortBy) {
+    const url = new URL(window.location.href);
+
+    const currentSort = url.searchParams.get('sort');
+    const currentOrder = url.searchParams.get('order');
+
+    if (currentSort === sortBy && currentOrder === 'asc') {
+      url.searchParams.set('order', 'desc');
+    } else {
+      url.searchParams.set('sort', sortBy);
+      url.searchParams.set('order', 'asc');
+    }
+
+    window.location.href = url.toString();
+  }
+</script>
