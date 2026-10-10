@@ -7,6 +7,7 @@ const pool = require('../config/db');
 router.get('/', async (req, res) => {
     try {
         // Get filter values from the URL
+        const search = req.query.search || '';
         const date = req.query.date || 'all';
         const status = req.query.status || 'all';
         const bookingType = req.query.booking_type || 'all';
@@ -16,6 +17,28 @@ router.get('/', async (req, res) => {
         // Store WHERE conditions and their values
         const conditions = [];
         const params = [];
+
+        // Search customer and barber first or last names
+        if (search) {
+            conditions.push(`(
+                c.first_name LIKE ?
+                OR c.last_name LIKE ?
+                OR b.first_name LIKE ?
+                OR b.last_name LIKE ?
+                OR CONCAT(c.first_name, ' ', c.last_name) LIKE ?
+                OR CONCAT(b.first_name, ' ', b.last_name) LIKE ?
+            )`);
+
+            const searchTerm = `%${search}%`;
+            params.push(
+                searchTerm,
+                searchTerm,
+                searchTerm,
+                searchTerm,
+                searchTerm,
+                searchTerm
+            );
+        }
 
         // Date filter
         if (date === 'today') {
@@ -116,6 +139,7 @@ router.get('/', async (req, res) => {
         const [rows] = await pool.execute(query, params);
 
         res.render('appointments/index', {
+            search,
             appointments: rows,
             error: null,
             selectedDate: date,

@@ -15,8 +15,10 @@
     <article class=" panel table-panel">
         <div class="toolbar">
             <div><strong></strong></div>
-            <form class="page-heading" method="get" action="/appointments" id="filterForm">
-                <label class="muted" for="date">Date:</label>
+            
+            <form class="page-heading" method="get" action="/appointments" id="filterForm" style="align-items: center;">
+
+                <label class="muted" for="date" style="align-self: center;">Date:</label>
                 <select name="date" id="date">
                     <option value="all" <%= selectedDate === 'today' ? 'selected' : ''  %>>All</option>
                     <option value="today" <%= selectedDate === 'today' ? 'selected' : ''  %>>Today</option>
@@ -26,7 +28,7 @@
                 </select>
                 
 
-                <label class="muted" for="status">Status:</label>
+                <label class="muted" for="status" style="align-self: center;">Status:</label>
                 <select name="status" id="status">
                     <option value="all" <%= selectedStatus === 'all' ? 'selected' : '' %>>All</option>
                     <option value="booked" <%= selectedStatus === 'booked' ? 'selected' : '' %>>Booked</option>
@@ -35,12 +37,26 @@
                     <option value="no_show" <%= selectedStatus === 'no_show' ? 'selected' : '' %>>No-show</option>
                 </select>
 
-                <label for="booking_type">Booking Type:</label>
+                <label class="muted" for="booking_type" style="align-self: center;">Booking Type:</label>
                 <select name="booking_type" id="booking_type">
                     <option value="all" <%= selectedBookingType === 'all' ? 'selected' : '' %>>All</option>
                     <option value="scheduled" <%= selectedBookingType === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
                     <option value="walk_in" <%= selectedBookingType === 'walk_in' ? 'selected' : '' %>>Walk-in</option>
                 </select>
+
+                <label class="muted" for="search" style="align-self: center;">
+                    Search:
+                </label>
+
+                <input
+                    type="search"
+                    name="search"
+                    id="search"
+                    placeholder="Search name..."
+                    value="<%= search || '' %>"
+                >
+
+                <button class="button" type="submit">Search</button>
             </form>
             
         </div>

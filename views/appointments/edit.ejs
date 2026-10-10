@@ -111,8 +111,13 @@
         const endHours = Math.floor(totalMinutes / 60);
         const endMinutes = totalMinutes % 60;
 
+        // Convert to 12-hour format
+        const period = endHours >= 12 ? 'PM' : 'AM';
+        const displayHours = endHours % 12 || 12;
+
         // Display the calculated time
-        endTimeInput.value = `${String(endHours).padStart(2, '0')}:` + `${String(endMinutes).padStart(2, '0')}`;
+        endTimeInput.value =
+            `${displayHours}:${String(endMinutes).padStart(2, '0')} ${period}`;
     }
 
     // Recalculate when the start time changes
